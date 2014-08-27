@@ -30,16 +30,16 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 int imageSize = 434176;
 int streamSize = imageSize + sizeof(double);
 std::string cameraName = "head/kinect2/depth";
-std::string imageTopicSubName = "/image_depth";
-std::string cameraInfoSubName = "/camera_info";
+std::string imageTopicSubName = "image_depth";
+std::string cameraInfoSubName = "camera_info";
 
 int main(int argC,char **argV)
 {
 	ros::init(argC,argV,"startDepth");
-	ros::NodeHandle n;
+	ros::NodeHandle n(cameraName);
 	image_transport::ImageTransport imT(n);
-	image_transport::Publisher imagePublisher = imT.advertise(cameraName+imageTopicSubName,1);
-	ros::Publisher cameraInfoPub = n.advertise<sensor_msgs::CameraInfo>(cameraName+cameraInfoSubName,1);
+	image_transport::Publisher imagePublisher = imT.advertise(imageTopicSubName,1);
+	ros::Publisher cameraInfoPub = n.advertise<sensor_msgs::CameraInfo>(cameraInfoSubName,1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
 	camInfoMgr.loadCameraInfo("");
 	std::string serverAddress;
