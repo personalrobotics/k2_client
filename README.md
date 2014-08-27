@@ -9,3 +9,22 @@ This software is meant to be run on the linux side of the system. The correspond
 Setting up the software
 =======================
 
+1. Download the k2_client package from following link. The package is currently compatible with rosbuild only.
+
+https://github.com/personalrobotics/k2_client
+
+2. Before you can use the k2_client package, you need to install libjsoncpp-dev. Use the following code snippet for it.
+
+`sudo apt-get update`
+
+`sudo apt-get install libjsoncpp-dev`
+
+3. Move the k2_client package to your ros workspace **or** add its location the ROS_PACAKGE_PATH environment variable by adding the following line at the end of ~/.bashrc
+
+`export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:PATH/TO/PACKAGE/THE/PACKAGE`
+
+4. Edit the value of the parameter "serverNameOrIP" with the IP address or name of your windows machine which runs the server software.
+
+5. Start all the ROS nodes by running the following command. Make sure that the roscore is running and the environment variable $ROS_MASTER_URI points to it.
+
+`roslaunch k2_client kinect2Client.launch`
