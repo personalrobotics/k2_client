@@ -27,7 +27,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 ***************************************************************************************/
 #include "k2_client.h"
 
-std::string topicName = "kinect2/audio";
+std::string topicName = "audio";
 int twiceStreamSize = 8200;
 int streamSize = 4100;
 
@@ -52,7 +52,7 @@ int main(int argC,char **argV)
 		bool parsingSuccessful = jsonReader.parse(jsonString,jsonObject,false);
 		k2_client::Audio audio;
 		audio.header.stamp = ros::Time(jsonObject["utcTime"].asDouble());
-		audio.header.frame_id = "/head/kinect2/microphone_frame";
+		audio.header.frame_id =  ros::this_node::getNamespace() + "/microphone_frame";
 		audio.beamAngle = jsonObject["beamAngle"].asDouble();
 		audio.beamAngleConfidence = jsonObject["beamAngleConfidence"].asDouble();
 		for(int i=0;i<256;i++)

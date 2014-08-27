@@ -70,7 +70,7 @@ int main(int argC,char **argV)
 			{
 				k2_client::Body body;
 				body.header.stamp = ros::Time(utcTime);
-				body.header.frame_id = "/head/kinect2/rgb";
+				body.header.frame_id =  ros::this_node::getNamespace() + "/rgb";
 				body.leanTrackingState = jsonObject[i]["LeanTrackingState"].asInt();
 				body.lean.leanX = jsonObject[i]["Lean"]["X"].asDouble();
 				body.lean.leanY = jsonObject[i]["Lean"]["Y"].asDouble();

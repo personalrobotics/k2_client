@@ -29,7 +29,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 
 int imageSize = 434176;
 int streamSize = imageSize + sizeof(double);
-std::string cameraName = "kinect2/ir";
+std::string cameraName = "ir";
 std::string imageTopicSubName = "image_ir";
 std::string cameraInfoSubName = "camera_info";
 
@@ -56,7 +56,7 @@ int main(int argC,char **argV)
 		double utcTime;
 		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
 		cvImage.header.stamp = ros::Time(utcTime);
-		cvImage.header.frame_id = "/head/kinect2/irFrame";
+		cvImage.header.frame_id =  ros::this_node::getNamespace() + "/irFrame";
 		cvImage.encoding = "mono16";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
