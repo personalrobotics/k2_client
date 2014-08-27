@@ -27,7 +27,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 ***************************************************************************************/
 #include "k2_client.h"
 
-std::string topicName = "/head/kinect2/audio";
+std::string topicName = "kinect2/audio";
 int twiceStreamSize = 8200;
 int streamSize = 4100;
 
@@ -35,10 +35,10 @@ int main(int argC,char **argV)
 {
 	ros::init(argC,argV,"startAudio");
 	ros::NodeHandle n;
-	ros::Publisher audioPub = n.advertise<k2_client::Audio>(topicName,1);
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
 	Socket mySocket(serverAddress.c_str(),"9004",twiceStreamSize);
+	ros::Publisher audioPub = n.advertise<k2_client::Audio>(topicName,1);
 	while(ros::ok())
 	{
 		mySocket.readData();

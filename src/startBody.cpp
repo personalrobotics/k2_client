@@ -28,7 +28,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include "k2_client.h"
 #include <iconv.h>
 
-std::string topicName = "/head/kinect2/bodyArray";
+std::string topicName = "bodyArray";
 size_t streamSize = 56008;
 size_t readSkipSize = 56000;
 size_t stringSize = 28000;
@@ -37,11 +37,11 @@ int main(int argC,char **argV)
 {
 	ros::init(argC,argV,"startBody");
 	ros::NodeHandle n;
-	ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
 	Socket mySocket(serverAddress.c_str(),"9003",streamSize);
 	iconv_t charConverter = iconv_open("UTF-8","UTF-16");
+	ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
 	char jsonCharArray[readSkipSize];
 	while(ros::ok())
 	{
