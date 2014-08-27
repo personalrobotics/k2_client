@@ -15,7 +15,9 @@ int main(int argC,char **argV)
 	ros::Publisher cameraInfoPub = n.advertise<sensor_msgs::CameraInfo>(cameraName+cameraInfoSubName,1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
 	camInfoMgr.loadCameraInfo("");
-	Socket mySocket("172.19.179.53","9001",streamSize);
+	std::string serverAddress;
+	n.getParam("/serverNameOrIP",serverAddress);
+	Socket mySocket(serverAddress.c_str(),"9001",streamSize);
 	cv::Mat frame;
 	cv_bridge::CvImage cvImage;
 	sensor_msgs::Image rosImage;

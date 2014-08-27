@@ -9,7 +9,9 @@ int main(int argC,char **argV)
 	ros::init(argC,argV,"startAudio");
 	ros::NodeHandle n;
 	ros::Publisher audioPub = n.advertise<k2_client::Audio>(topicName,1);
-	Socket mySocket("172.19.179.53","9004",twiceStreamSize);
+	std::string serverAddress;
+	n.getParam("/serverNameOrIP",serverAddress);
+	Socket mySocket(serverAddress.c_str(),"9004",twiceStreamSize);
 	while(ros::ok())
 	{
 		mySocket.readData();

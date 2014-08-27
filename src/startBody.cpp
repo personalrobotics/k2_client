@@ -11,7 +11,9 @@ int main(int argC,char **argV)
 	ros::init(argC,argV,"startBody");
 	ros::NodeHandle n;
 	ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
-	Socket mySocket("172.19.179.53","9003",streamSize);
+	std::string serverAddress;
+	n.getParam("/serverNameOrIP",serverAddress);
+	Socket mySocket(serverAddress.c_str(),"9003",streamSize);
 	iconv_t charConverter = iconv_open("UTF-8","UTF-16");
 	char jsonCharArray[readSkipSize];
 	while(ros::ok())

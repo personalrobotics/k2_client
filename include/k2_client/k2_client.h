@@ -37,14 +37,14 @@ public:
 	int mSocket;
 	int mBufferSize;
 	char *mBuffer;
-	Socket(char address[],char portNum[],int bufferSize);
+	Socket(const char address[],char portNum[],int bufferSize);
 	void readData();
 private:
 
 };
 
 
-Socket::Socket(char address[],char portNum[],int bufferSize)
+Socket::Socket(const char address[],char portNum[],int bufferSize)
 {
 	memset(&(this->hints), 0, sizeof (this->hints));
 	this->hints.ai_family = AF_INET;
