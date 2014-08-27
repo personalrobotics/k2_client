@@ -1,6 +1,6 @@
-k2_server
+k2_client
 =========
-Server application for Kinect for Windows v2
+Client application for Kinect for Windows v2
 
 This software is a part of software package for integrating kinect for windows v2 with ROS. The software package is divided into two parts. One part runs on windows machine and dumps the data over the network, while, the other part runs on linux machine which reads the stream and publishes appropriate ROS topics.
 
