@@ -30,7 +30,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 int imageSize = 434176;
 int streamSize = imageSize + sizeof(double);
 std::string cameraName = "depth";
-std::string imageTopicSubName = "image_depth";
+std::string imageTopicSubName = "image_raw";
 std::string cameraInfoSubName = "camera_info";
 
 int main(int argC,char **argV)
@@ -56,8 +56,8 @@ int main(int argC,char **argV)
 		double utcTime;
 		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
 		cvImage.header.stamp = ros::Time(utcTime);
-		cvImage.header.frame_id =  ros::this_node::getNamespace() + "/depthFrame";
-		cvImage.encoding = "mono16";
+		cvImage.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/depthFrame";
+		cvImage.encoding = "16UC1";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
 		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();

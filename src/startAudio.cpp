@@ -52,7 +52,7 @@ int main(int argC,char **argV)
 		bool parsingSuccessful = jsonReader.parse(jsonString,jsonObject,false);
 		k2_client::Audio audio;
 		audio.header.stamp = ros::Time(jsonObject["utcTime"].asDouble());
-		audio.header.frame_id =  ros::this_node::getNamespace() + "/microphone_frame";
+		audio.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/microphone_frame";
 		audio.beamAngle = jsonObject["beamAngle"].asDouble();
 		audio.beamAngleConfidence = jsonObject["beamAngleConfidence"].asDouble();
 		for(int i=0;i<256;i++)

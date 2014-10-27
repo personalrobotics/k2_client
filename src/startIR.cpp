@@ -56,7 +56,7 @@ int main(int argC,char **argV)
 		double utcTime;
 		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
 		cvImage.header.stamp = ros::Time(utcTime);
-		cvImage.header.frame_id =  ros::this_node::getNamespace() + "/irFrame";
+		cvImage.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/irFrame";
 		cvImage.encoding = "mono16";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
