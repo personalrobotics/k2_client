@@ -27,11 +27,13 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 ***************************************************************************************/
 #include "k2_client.h"
 
+// this alternate resolution for an aligned depth image
+//int imageSize = 639392;
 int imageSize = 434176;
 int streamSize = imageSize + sizeof(double);
 std::string cameraName = "depth";
-std::string imageTopicSubName = "image_raw";
-std::string cameraInfoSubName = "camera_info";
+std::string imageTopicSubName = "image_depth";
+std::string cameraFrame = "";
 
 int main(int argC,char **argV)
 {
@@ -40,9 +42,11 @@ int main(int argC,char **argV)
 	image_transport::ImageTransport imT(n);
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
+    n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
+            "/depth_frame", cameraFrame);
 	Socket mySocket(serverAddress.c_str(),"9001",streamSize);
-	image_transport::Publisher imagePublisher = imT.advertise(imageTopicSubName,1);
-	ros::Publisher cameraInfoPub = n.advertise<sensor_msgs::CameraInfo>(cameraInfoSubName,1);
+    image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
+            imageTopicSubName, 1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
 	camInfoMgr.loadCameraInfo("");
 	cv::Mat frame;
@@ -51,20 +55,19 @@ int main(int argC,char **argV)
 	while(ros::ok())
 	{
 		mySocket.readData();
-		frame = cv::Mat(cv::Size(512,424),CV_16UC1,mySocket.mBuffer);
+        // this alternate resolution was for an aligned depth image
+		//frame = cv::Mat(cv::Size(754,424),CV_16UC1,mySocket.mBuffer);
+        frame = cv::Mat(cv::Size(512,424), CV_16UC1,mySocket.mBuffer);
 		cv::flip(frame,frame,1);
 		double utcTime;
 		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
-		cvImage.header.stamp = ros::Time(utcTime);
-		cvImage.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/depthFrame";
-		cvImage.encoding = "16UC1";
+        cvImage.header.frame_id = cameraFrame.c_str();
+		cvImage.encoding = "mono16";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
 		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
-		camInfo.header.stamp = cvImage.header.stamp;
 		camInfo.header.frame_id = cvImage.header.frame_id;
-		cameraInfoPub.publish(camInfo);
-		imagePublisher.publish(rosImage);
+        cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
 		ros::spinOnce();
 	}
 	return 0;

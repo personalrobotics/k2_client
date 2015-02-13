@@ -31,7 +31,7 @@ int imageSize = 434176;
 int streamSize = imageSize + sizeof(double);
 std::string cameraName = "ir";
 std::string imageTopicSubName = "image_ir";
-std::string cameraInfoSubName = "camera_info";
+std::string cameraFrame = "";
 
 int main(int argC,char **argV)
 {
@@ -40,9 +40,11 @@ int main(int argC,char **argV)
 	image_transport::ImageTransport imT(n);
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
+    n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
+            "/ir_frame", cameraFrame);
 	Socket mySocket(serverAddress.c_str(),"9002",streamSize);
-	image_transport::Publisher imagePublisher = imT.advertise(imageTopicSubName,1);
-	ros::Publisher cameraInfoPub = n.advertise<sensor_msgs::CameraInfo>(cameraInfoSubName,1);
+    image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
+            imageTopicSubName, 1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
 	camInfoMgr.loadCameraInfo("");
 	cv::Mat frame;
@@ -55,16 +57,13 @@ int main(int argC,char **argV)
 		cv::flip(frame,frame,1);
 		double utcTime;
 		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
-		cvImage.header.stamp = ros::Time(utcTime);
-		cvImage.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/irFrame";
+		cvImage.header.frame_id = cameraFrame.c_str();
 		cvImage.encoding = "mono16";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
 		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
-		camInfo.header.stamp = cvImage.header.stamp;
 		camInfo.header.frame_id = cvImage.header.frame_id;
-		cameraInfoPub.publish(camInfo);
-		imagePublisher.publish(rosImage);
+        cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
 		ros::spinOnce();
 	}
 	return 0;
