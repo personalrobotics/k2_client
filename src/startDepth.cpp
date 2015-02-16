@@ -62,7 +62,7 @@ int main(int argC,char **argV)
 		double utcTime;
 		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
         cvImage.header.frame_id = cameraFrame.c_str();
-		cvImage.encoding = "mono16";
+		cvImage.encoding = "16UC1";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
 		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
