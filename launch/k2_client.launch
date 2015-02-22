@@ -7,8 +7,9 @@
         
         <node name="startRGB" pkg="k2_client" type="startRGB"/>
         <node name="startDepth" pkg="k2_client" type="startDepth" />
-        <node name="startIR" pkg="k2_client" type="startIR"/>
+        <!--node name="startIR" pkg="k2_client" type="startIR"/-->
         <node name="startBody" pkg="k2_client" type="startBody"/>
         <node name="startAudio" pkg="k2_client" type="startAudio"/>
+        <node name="startMapping" pkg="k2_client" type="startMapping"/>
     </group>
 </launch>

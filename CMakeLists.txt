@@ -27,19 +27,21 @@ rosbuild_genmsg()
 set(includeFolders ${PROJECT_SOURCE_DIR}/include/k2_client)
 
 set(RGBsourceFiles ${PROJECT_SOURCE_DIR}/src/startRGB.cpp)
-set(IRsourceFiles ${PROJECT_SOURCE_DIR}/src/startIR.cpp)
+#set(IRsourceFiles ${PROJECT_SOURCE_DIR}/src/startIR.cpp)
 set(DEPTHsourceFiles ${PROJECT_SOURCE_DIR}/src/startDepth.cpp)
 set(AUDIOsourceFiles ${PROJECT_SOURCE_DIR}/src/startAudio.cpp)
 set(BODYsourceFiles ${PROJECT_SOURCE_DIR}/src/startBody.cpp)
+set(MAPPINGsourceFiles ${PROJECT_SOURCE_DIR}/src/startMapping.cpp)
 
 include_directories(${includeFolders})
 include_directories(${JSONCPP_INCLUDE_DIR})
 
 rosbuild_add_executable(startRGB ${RGBsourceFiles})
-rosbuild_add_executable(startIR ${IRsourceFiles})
+#rosbuild_add_executable(startIR ${IRsourceFiles})
 rosbuild_add_executable(startDepth ${DEPTHsourceFiles})
 rosbuild_add_executable(startAudio ${AUDIOsourceFiles})
 rosbuild_add_executable(startBody ${BODYsourceFiles})
+rosbuild_add_executable(startMapping ${MAPPINGsourceFiles})
 
 target_link_libraries(startAudio ${JSONCPP_LIBRARY})
 target_link_libraries(startBody ${JSONCPP_LIBRARY})

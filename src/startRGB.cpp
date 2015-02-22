@@ -27,7 +27,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 ***************************************************************************************/
 #include "k2_client.h"
 
-int imageSize = 6220800;
+int imageSize = 1920*1080*3;//6220800;
 int streamSize = imageSize + sizeof(double);
 std::string cameraName = "rgb";
 std::string imageTopicSubName = "image_color";
