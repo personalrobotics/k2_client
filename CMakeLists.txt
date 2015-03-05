@@ -14,6 +14,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules/)
 
 find_package(Jsoncpp REQUIRED)
 
+# Find PCL dependencies
+find_package(PCL REQUIRED COMPONENTS common io)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
@@ -31,6 +37,7 @@ set(IRsourceFiles ${PROJECT_SOURCE_DIR}/src/startIR.cpp)
 set(DEPTHsourceFiles ${PROJECT_SOURCE_DIR}/src/startDepth.cpp)
 set(AUDIOsourceFiles ${PROJECT_SOURCE_DIR}/src/startAudio.cpp)
 set(BODYsourceFiles ${PROJECT_SOURCE_DIR}/src/startBody.cpp)
+set(POINTCLOUDsourceFiles ${PROJECT_SOURCE_DIR}/src/startPointCloud.cpp)
 
 include_directories(${includeFolders})
 include_directories(${JSONCPP_INCLUDE_DIR})
@@ -40,6 +47,8 @@ rosbuild_add_executable(startIR ${IRsourceFiles})
 rosbuild_add_executable(startDepth ${DEPTHsourceFiles})
 rosbuild_add_executable(startAudio ${AUDIOsourceFiles})
 rosbuild_add_executable(startBody ${BODYsourceFiles})
+rosbuild_add_executable(startPointCloud ${POINTCLOUDsourceFiles})
 
 target_link_libraries(startAudio ${JSONCPP_LIBRARY})
 target_link_libraries(startBody ${JSONCPP_LIBRARY})
+target_link_libraries(startPointCloud ${PCL_LIBRARIES})
