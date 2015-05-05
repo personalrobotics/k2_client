@@ -25,7 +25,7 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
 WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************************/
-#include "k2_client.h"
+#include <k2_client/k2_client.h>
 
 // this alternate resolution for an aligned depth image
 //int imageSize = 639392;
@@ -44,7 +44,7 @@ int main(int argC,char **argV)
 	n.getParam("/serverNameOrIP",serverAddress);
     n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
             "/depth_frame", cameraFrame);
-	Socket mySocket(serverAddress.c_str(),"9001",streamSize);
+    Socket mySocket(serverAddress.c_str(),const_cast<char*>("9001"),streamSize);
     image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
             imageTopicSubName, 1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);

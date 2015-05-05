@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
     <param name="serverNameOrIP" value="172.19.179.53" />
     <group ns="/head/kinect2">

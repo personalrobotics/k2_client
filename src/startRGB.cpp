@@ -25,7 +25,7 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
 WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************************/
-#include "k2_client.h"
+#include <k2_client/k2_client.h>
 
 int imageSize = 6220800;
 int streamSize = imageSize + sizeof(double);
@@ -42,7 +42,7 @@ int main(int argC,char **argV)
 	n.getParam("/serverNameOrIP",serverAddress);
     n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
             "/rgb_frame", cameraFrame);
-	Socket mySocket(serverAddress.c_str(),"9000",streamSize);
+    Socket mySocket(serverAddress.c_str(),const_cast<char*>("9000"),streamSize);
     image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
             imageTopicSubName, 1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);

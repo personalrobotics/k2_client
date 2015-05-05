@@ -25,7 +25,7 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
 WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************************/
-#include "k2_client.h"
+#include <k2_client/k2_client.h>
 #include <iconv.h>
 
 std::string topicName = "bodyArray";
@@ -39,7 +39,7 @@ int main(int argC,char **argV)
 	ros::NodeHandle n;
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
-	Socket mySocket(serverAddress.c_str(),"9003",streamSize);
+    Socket mySocket(serverAddress.c_str(),const_cast<char*>("9003"),streamSize);
 	iconv_t charConverter = iconv_open("UTF-8","UTF-16");
 	ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
 	char jsonCharArray[readSkipSize];
