@@ -3,8 +3,6 @@ project(k2_client)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
-message(STATUS "Module path=${CMAKE_MODULE_PATH}")
-
 find_package(catkin REQUIRED
             COMPONENTS roscpp rospy std_msgs cv_bridge image_transport camera_info_manager message_generation)
 find_package(Jsoncpp REQUIRED)
