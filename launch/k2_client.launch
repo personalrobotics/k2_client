@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-    <param name="serverNameOrIP" value="172.19.179.53" />
-    <group ns="/head/kinect2">
+    <param name="serverNameOrIP" value="192.168.1.3" />
+    <group ns="/kinect2">
         <param name="rgb_frame" value="/head/kinect2/rgb"/>
         <param name="depth_frame" value="/head/kinect2/depth"/>
         <param name="ir_frame" value="/head/kinect2/depth"/>
