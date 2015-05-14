@@ -25,7 +25,7 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
 WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************************/
-#include "k2_client.h"
+#include <k2_client/k2_client.h>
 
 std::string topicName = "audio";
 int twiceStreamSize = 8200;
@@ -37,7 +37,7 @@ int main(int argC,char **argV)
 	ros::NodeHandle n;
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
-	Socket mySocket(serverAddress.c_str(),"9004",twiceStreamSize);
+    Socket mySocket(serverAddress.c_str(),const_cast<char*>("9004"),twiceStreamSize);
 	ros::Publisher audioPub = n.advertise<k2_client::Audio>(topicName,1);
 	while(ros::ok())
 	{
