@@ -124,17 +124,17 @@ int main(int argC,char **argV)
 						case 24: fieldName = "ThumbRight";break;
 					}
 					
-					JOAT.orientation.x = jsonObject[i][fieldName]["Orientation"]["X"].asDouble();
-					JOAT.orientation.y = jsonObject[i][fieldName]["Orientation"]["Y"].asDouble();
-					JOAT.orientation.z = jsonObject[i][fieldName]["Orientation"]["Z"].asDouble();
-					JOAT.orientation.w = jsonObject[i][fieldName]["Orientation"]["W"].asDouble();
-					JOAT.jointType = jsonObject[i][fieldName]["JointType"].asInt();
+					JOAT.orientation.x = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["X"].asDouble();
+					JOAT.orientation.y = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Y"].asDouble();
+					JOAT.orientation.z = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Z"].asDouble();
+					JOAT.orientation.w = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["W"].asDouble();
+					JOAT.jointType = jsonObject[i]["JointOrientations"][fieldName]["JointType"].asInt();
 
-					JPAS.trackingState = jsonObject[i][fieldName]["TrackingState"].asBool();
-					JPAS.position.x = jsonObject[i][fieldName]["Position"]["X"].asDouble();
-					JPAS.position.y = jsonObject[i][fieldName]["Position"]["Y"].asDouble();
-					JPAS.position.z = jsonObject[i][fieldName]["Position"]["Z"].asDouble();
-					JPAS.jointType = jsonObject[i][fieldName]["JointType"].asInt();
+					JPAS.trackingState = jsonObject[i]["Joints"][fieldName]["TrackingState"].asBool();
+					JPAS.position.x = jsonObject[i]["Joints"][fieldName]["Position"]["X"].asDouble();
+					JPAS.position.y = jsonObject[i]["Joints"][fieldName]["Position"]["Y"].asDouble();
+					JPAS.position.z = jsonObject[i]["Joints"][fieldName]["Position"]["Z"].asDouble();
+					JPAS.jointType = jsonObject[i]["Joints"][fieldName]["JointType"].asInt();
 					
 					body.jointOrientations.push_back(JOAT);
 					body.jointPositions.push_back(JPAS);
