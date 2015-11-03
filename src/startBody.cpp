@@ -28,6 +28,8 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include "k2_client.h"
 #include <iconv.h>
 
+#include <ros/console.h>
+
 std::string topicName = "bodyArray";
 size_t streamSize = 56008;
 size_t readSkipSize = 56000;
@@ -43,13 +45,16 @@ int main(int argC,char **argV)
 	iconv_t charConverter = iconv_open("UTF-8","UTF-16");
 	ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
 	char jsonCharArray[readSkipSize];
+    ROS_DEBUG("%s","NOT ENTERED\n");
 	while(ros::ok())
 	{
-		mySocket.readData();
+        ROS_DEBUG("%s","WHILE ENTERED\n");
+		mySocket.readData();        
 		char *jsonCharArrayPtr;
 		char *socketCharArrayPtr;
 		jsonCharArrayPtr = jsonCharArray;
 		socketCharArrayPtr = mySocket.mBuffer;
+        ROS_DEBUG("%s\n",socketCharArrayPtr);
 		iconv(charConverter,&socketCharArrayPtr,&readSkipSize,&jsonCharArrayPtr,&stringSize);
 		double utcTime;
 		memcpy(&utcTime,&mySocket.mBuffer[readSkipSize],sizeof(double));
