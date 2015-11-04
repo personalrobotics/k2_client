@@ -40,6 +40,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 
 //*******************************ROS specific Headers******************************//
 #include "ros/ros.h"
+#include "ros/console.h"
 //***********************************Other Headers*********************************//
 
 #include "cv_bridge/cv_bridge.h"

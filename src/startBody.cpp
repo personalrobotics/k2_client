@@ -6,14 +6,14 @@ Authors: Anurag Jakhotia<ajakhoti@andrew.cmu.edu>, Prasanna Velagapudi<pkv@cs.cm
 Redistribution and use in source and binary forms, with or without modification, are 
 permitted provided that the following conditions are met:
 
- -	Redistributions of source code must retain the above copyright notice, this list 
- 	of conditions and the following disclaimer.
- -	Redistributions in binary form must reproduce the above copyright notice, this 
- 	list of conditions and the following disclaimer in the documentation and/or other 
- 	materials provided with the 	distribution.
- -	Neither the name of Carnegie Mellon University nor the names of its contributors 
- 	may be used to endorse or promote products derived from this software without 
- 	specific prior written 	permission.
+ -    Redistributions of source code must retain the above copyright notice, this list 
+     of conditions and the following disclaimer.
+ -    Redistributions in binary form must reproduce the above copyright notice, this 
+     list of conditions and the following disclaimer in the documentation and/or other 
+     materials provided with the     distribution.
+ -    Neither the name of Carnegie Mellon University nor the names of its contributors 
+     may be used to endorse or promote products derived from this software without 
+     specific prior written     permission.
  
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
 EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
@@ -36,39 +36,38 @@ size_t stringSize = 28000;
 
 int main(int argC,char **argV)
 {
-    ROS_INFO("RECEIVED");
-	ros::init(argC,argV,"startBody");
-	ros::NodeHandle n;
-	std::string serverAddress;
-	n.getParam("/serverNameOrIP",serverAddress);
-	Socket mySocket(serverAddress.c_str(),"9003",streamSize);
-	iconv_t charConverter = iconv_open("UTF-8","UTF-16");
-	ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
-	char jsonCharArray[readSkipSize];
+    ros::init(argC,argV,"startBody");
+    ros::NodeHandle n;
+    std::string serverAddress;
+    n.getParam("/serverNameOrIP",serverAddress);
+    Socket mySocket(serverAddress.c_str(),"9003",streamSize);
+    iconv_t charConverter = iconv_open("UTF-8","UTF-16");
+    ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
+    char jsonCharArray[readSkipSize];
    
-	while(ros::ok())
-	{
-		mySocket.readData();        
-		char *jsonCharArrayPtr;
-		char *socketCharArrayPtr;
-		jsonCharArrayPtr = jsonCharArray;
-		socketCharArrayPtr = mySocket.mBuffer;
+    while(ros::ok())
+    {
+        mySocket.readData();        
+        char *jsonCharArrayPtr;
+        char *socketCharArrayPtr;
+        jsonCharArrayPtr = jsonCharArray;
+        socketCharArrayPtr = mySocket.mBuffer;
         iconv(charConverter,&socketCharArrayPtr,&readSkipSize,&jsonCharArrayPtr,&stringSize);
-		double utcTime;
-		memcpy(&utcTime,&mySocket.mBuffer[readSkipSize],sizeof(double));
-		std::string jsonString(jsonCharArray);
-		Json::Value jsonObject;
-		Json::Reader jsonReader;
-		bool parsingSuccessful = jsonReader.parse(jsonString,jsonObject,false);
-		if(!parsingSuccessful)
-		{
-			std::cout<<"Failure to parse: "<<parsingSuccessful<<std::endl;
-			continue;
-		}
-		k2_client::BodyArray bodyArray;
-		try
-		{
-			for(int i=0;i<6;i++)
+        double utcTime;
+        memcpy(&utcTime,&mySocket.mBuffer[readSkipSize],sizeof(double));
+        std::string jsonString(jsonCharArray);
+        Json::Value jsonObject;
+        Json::Reader jsonReader;
+        bool parsingSuccessful = jsonReader.parse(jsonString,jsonObject,false);
+        if(!parsingSuccessful)
+        {
+            ROS_ERROR("Failure to parse");
+            continue;
+        }
+        k2_client::BodyArray bodyArray;
+        try
+        {
+            for(int i=0;i<6;i++)
             {
                 k2_client::Body body;
                 body.header.stamp = ros::Time(utcTime);
@@ -125,7 +124,7 @@ int main(int argC,char **argV)
                         case 23: fieldName = "HandTipRight";break;
                         case 24: fieldName = "ThumbRight";break;
                     }
-                    
+
                     JOAT.orientation.x = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["X"].asDouble();
                     JOAT.orientation.y = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Y"].asDouble();
                     JOAT.orientation.z = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Z"].asDouble();
@@ -143,13 +142,13 @@ int main(int argC,char **argV)
                 }
                 bodyArray.bodies.push_back(body);
             }
-		}
-		catch (...)
-		{
-			std::cout<<"An exception occured"<<std::endl;
-			continue;
-		}
-		bodyPub.publish(bodyArray);
-	}
-	return 0;
+        }
+        catch (...)
+        {
+            ROS_ERROR("An exception occured");
+            continue;
+        }
+        bodyPub.publish(bodyArray);
+    }
+    return 0;
 }
