@@ -29,7 +29,6 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include <iconv.h>
 
 
-
 std::string topicName = "bodyArray";
 size_t streamSize = 56008;
 size_t readSkipSize = 56000;
@@ -115,7 +114,7 @@ int main(int argC,char **argV)
                         case 12: fieldName = "HipLeft";break;
                         case 13: fieldName = "KneeLeft";break;
                         case 14: fieldName = "AnkleLeft";break;
-                        case 15: fieldName = "SpineBase";break;
+                        case 15: fieldName = "FootLeft";break;
                         case 16: fieldName = "HipRight";break;
                         case 17: fieldName = "KneeRight";break;
                         case 18: fieldName = "AnkleRight";break;
@@ -126,8 +125,7 @@ int main(int argC,char **argV)
                         case 23: fieldName = "HandTipRight";break;
                         case 24: fieldName = "ThumbRight";break;
                     }
-
-
+                    
                     JOAT.orientation.x = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["X"].asDouble();
                     JOAT.orientation.y = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Y"].asDouble();
                     JOAT.orientation.z = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Z"].asDouble();
