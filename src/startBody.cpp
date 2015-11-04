@@ -47,6 +47,7 @@ int main(int argC,char **argV)
    
     while(ros::ok())
     {
+        ROS_ERROR("An exception occured");
         mySocket.readData();        
         char *jsonCharArrayPtr;
         char *socketCharArrayPtr;
