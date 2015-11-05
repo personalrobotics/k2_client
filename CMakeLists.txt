@@ -82,3 +82,6 @@ target_link_libraries(startBody  ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
 target_link_libraries(startDepth ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
 target_link_libraries(startIR    ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
 target_link_libraries(startRGB   ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
+
+
+

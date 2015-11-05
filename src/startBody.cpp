@@ -1,28 +1,30 @@
 /*************************************************************************************
- C *opyright (c) 2013, Carnegie Mellon University
- All rights reserved.
- Authors: Anurag Jakhotia<ajakhoti@andrew.cmu.edu>, Prasanna Velagapudi<pkv@cs.cmu.edu>
- Redistribution and use in source and binary forms, with or without modification, are 
- permitted provided that the following conditions are met:
+Copyright (c) 2013, Carnegie Mellon University
+All rights reserved.
+Authors: Anurag Jakhotia<ajakhoti@andrew.cmu.edu>, Prasanna Velagapudi<pkv@cs.cmu.edu>
+
+Redistribution and use in source and binary forms, with or without modification, are 
+permitted provided that the following conditions are met:
+
  -    Redistributions of source code must retain the above copyright notice, this list 
- of conditions and the following disclaimer.
+     of conditions and the following disclaimer.
  -    Redistributions in binary form must reproduce the above copyright notice, this 
- list of conditions and the following disclaimer in the documentation and/or other 
- materials provided with the     distribution.
+     list of conditions and the following disclaimer in the documentation and/or other 
+     materials provided with the     distribution.
  -    Neither the name of Carnegie Mellon University nor the names of its contributors 
- may be used to endorse or promote products derived from this software without 
- specific prior written     permission.
+     may be used to endorse or promote products derived from this software without 
+     specific prior written     permission.
  
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
- EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
- SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
- TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
- BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
- WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- ***************************************************************************************/
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
+WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+***************************************************************************************/
 #include "k2_client/k2_client.h"
 #include "k2_client/BodyArray.h"
 #include <iconv.h>
@@ -42,19 +44,17 @@ int main(int argC,char **argV)
     iconv_t charConverter = iconv_open("UTF-8","UTF-16");
     ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
     char jsonCharArray[readSkipSize];
-    
+   
     while(ros::ok())
     {
         mySocket.readData();        
         char *jsonCharArrayPtr;
         char *socketCharArrayPtr;
-        size_t readSkipSizeC = readSkipSize;
-        size_t stringSizeloC= stringSize;
         jsonCharArrayPtr = jsonCharArray;
         socketCharArrayPtr = mySocket.mBuffer;
-        iconv(charConverter,&socketCharArrayPtr,&readSkipSizeC,&jsonCharArrayPtr,&stringSizeloC);
+        iconv(charConverter,&socketCharArrayPtr,&readSkipSize,&jsonCharArrayPtr,&stringSize);
         double utcTime;
-        memcpy(&utcTime,&mySocket.mBuffer[readSkipSizeC],sizeof(double));
+        memcpy(&utcTime,&mySocket.mBuffer[readSkipSize],sizeof(double));
         std::string jsonString(jsonCharArray);
         Json::Value jsonObject;
         Json::Reader jsonReader;
@@ -124,13 +124,13 @@ int main(int argC,char **argV)
                         case 23: fieldName = "HandTipRight";break;
                         case 24: fieldName = "ThumbRight";break;
                     }
-                    
+
                     JOAT.orientation.x = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["X"].asDouble();
                     JOAT.orientation.y = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Y"].asDouble();
                     JOAT.orientation.z = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Z"].asDouble();
                     JOAT.orientation.w = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["W"].asDouble();
                     JOAT.jointType = jsonObject[i]["JointOrientations"][fieldName]["JointType"].asInt();
-                    
+
                     JPAS.trackingState = jsonObject[i]["Joints"][fieldName]["TrackingState"].asBool();
                     JPAS.position.x = jsonObject[i]["Joints"][fieldName]["Position"]["X"].asDouble();
                     JPAS.position.y = jsonObject[i]["Joints"][fieldName]["Position"]["Y"].asDouble();
