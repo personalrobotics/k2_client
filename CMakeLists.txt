@@ -9,7 +9,6 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 
-
 find_package(Jsoncpp REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
     rospy
@@ -34,8 +33,10 @@ add_message_files(FILES
     Body.msg
 )
 
-#uncomment if you have defined messages/services
-generate_messages(DEPENDENCIES geometry_msgs)
+generate_messages(DEPENDENCIES
+    geometry_msgs
+    std_msgs
+)
 
 catkin_package(
     INCLUDE_DIRS include
@@ -44,18 +45,19 @@ catkin_package(
     CATKIN_DEPENDS
         geometry_msgs
         std_msgs
+        message_runtime
     DEPENDS
         Jsoncpp
 )
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+# Set the default path for built executables to the "bin" directory.
+set(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/bin")
+# Set the default path for built libraries to the "lib" directory.
+set(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/lib")
 
 include_directories(SYSTEM
+    "${PROJECT_SOURCE_DIR}/include"
     ${catkin_INCLUDE_DIRS}
-    ${PROJECT_SOURCE_DIR}/include/k2_client
     ${JSONCPP_INCLUDE_DIR}
 )
 
@@ -63,17 +65,20 @@ link_directories(
     ${catkin_LIBRARY_DIRS}
 )
 
-add_executable(startRGB ${PROJECT_SOURCE_DIR}/src/startRGB.cpp)
-add_executable(startIR ${PROJECT_SOURCE_DIR}/src/startIR.cpp)
-add_executable(startDepth ${PROJECT_SOURCE_DIR}/src/startDepth.cpp)
-add_executable(startAudio ${PROJECT_SOURCE_DIR}/src/startAudio.cpp)
-add_executable(startBody ${PROJECT_SOURCE_DIR}/src/startBody.cpp)
+add_executable(startAudio "${PROJECT_SOURCE_DIR}/src/startAudio.cpp")
+add_executable(startBody  "${PROJECT_SOURCE_DIR}/src/startBody.cpp")
+add_executable(startDepth "${PROJECT_SOURCE_DIR}/src/startDepth.cpp")
+add_executable(startIR    "${PROJECT_SOURCE_DIR}/src/startIR.cpp")
+add_executable(startRGB   "${PROJECT_SOURCE_DIR}/src/startRGB.cpp")
+
+add_dependencies(startAudio ${k2_client_EXPORTED_TARGETS})
+add_dependencies(startBody  ${k2_client_EXPORTED_TARGETS})
+add_dependencies(startDepth ${k2_client_EXPORTED_TARGETS})
+add_dependencies(startIR    ${k2_client_EXPORTED_TARGETS})
+add_dependencies(startRGB   ${k2_client_EXPORTED_TARGETS})
 
 target_link_libraries(startAudio ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
-target_link_libraries(startBody ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
-target_link_libraries(startRGB ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
-target_link_libraries(startIR ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
+target_link_libraries(startBody  ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
 target_link_libraries(startDepth ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
-
-
-
+target_link_libraries(startIR    ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
+target_link_libraries(startRGB   ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
