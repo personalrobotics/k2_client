@@ -30,9 +30,9 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include <iconv.h>
 
 std::string topicName = "bodyArray";
-int readSkipSize = 56000;
-int stringSize = 28000;
-int streamSize = readSkipSize + sizeof(double);
+size_t streamSize = 56008;
+size_t readSkipSize = 56000;
+size_t stringSize = 28000;
 
 int main(int argC,char **argV)
 {
@@ -40,36 +40,23 @@ int main(int argC,char **argV)
     ros::NodeHandle n;
     std::string serverAddress;
     n.getParam("/serverNameOrIP",serverAddress);
-    Socket mySocket(serverAddress.c_str(),const_cast<char*>("9003"), streamSize);
+    Socket mySocket(serverAddress.c_str(),"9003",streamSize);
+    iconv_t charConverter = iconv_open("UTF-8","UTF-16");
     ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
-    char utf16Array[readSkipSize];
-    char jsonCharArray[stringSize];
-    char *jsonCharArrayPtr;
-    char *utf16ArrayPtr;
-    ros::Rate r(30);
+    char jsonCharArray[readSkipSize];
+    
     while(ros::ok())
     {
-        mySocket.readData();
+        mySocket.readData();        
+        char *jsonCharArrayPtr;
+        char *socketCharArrayPtr;
+        size_t readSkipSizeC = readSkipSize;
+        size_t stringSizeloC= stringSize;
         jsonCharArrayPtr = jsonCharArray;
-        utf16ArrayPtr = utf16Array;
-        memset(utf16Array, 0, sizeof(utf16Array));
-        memcpy(utf16Array, mySocket.mBuffer, sizeof(utf16Array));
-        size_t iconv_in = static_cast<size_t>(readSkipSize);
-        size_t iconv_out = static_cast<size_t>(stringSize);
-        iconv_t charConverter = iconv_open("UTF-8","UTF-16");
-        size_t nconv = iconv(charConverter, &utf16ArrayPtr, &iconv_in, &jsonCharArrayPtr, &iconv_out);
-        iconv_close(charConverter);
-        if (nconv == (size_t) - 1)
-        {
-            if (errno == EINVAL)
-                ROS_ERROR("An incomplete multibyte sequence has been encountered in the input.");
-            else if (errno == EILSEQ)
-                ROS_ERROR("An invalid multibyte sequence has been encountered in the input.");
-            else
-                ROS_ERROR("There is not sufficient room at jsonCharArray");
-        }
-        double utcTime = 0.0;
-        memcpy(&utcTime,&mySocket.mBuffer[readSkipSize], sizeof(double));
+        socketCharArrayPtr = mySocket.mBuffer;
+        iconv(charConverter,&socketCharArrayPtr,&readSkipSizeC,&jsonCharArrayPtr,&stringSizeloC);
+        double utcTime;
+        memcpy(&utcTime,&mySocket.mBuffer[readSkipSizeC],sizeof(double));
         std::string jsonString(jsonCharArray);
         Json::Value jsonObject;
         Json::Reader jsonReader;
@@ -128,7 +115,7 @@ int main(int argC,char **argV)
                         case 12: fieldName = "HipLeft";break;
                         case 13: fieldName = "KneeLeft";break;
                         case 14: fieldName = "AnkleLeft";break;
-                        case 15: fieldName = "SpineBase";break;
+                        case 15: fieldName = "FootLeft";break;
                         case 16: fieldName = "HipRight";break;
                         case 17: fieldName = "KneeRight";break;
                         case 18: fieldName = "AnkleRight";break;
@@ -164,8 +151,6 @@ int main(int argC,char **argV)
             continue;
         }
         bodyPub.publish(bodyArray);
-        ros::spinOnce();
-        r.sleep();
     }
     return 0;
 }

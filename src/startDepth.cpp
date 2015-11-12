@@ -44,7 +44,7 @@ int main(int argC,char **argV)
 	n.getParam("/serverNameOrIP",serverAddress);
     n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
             "/depth_frame", cameraFrame);
-    Socket mySocket(serverAddress.c_str(),const_cast<char*>("9001"),streamSize);
+    Socket mySocket(serverAddress.c_str(),"9001",streamSize);
     image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
             imageTopicSubName, 1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
