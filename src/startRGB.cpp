@@ -35,41 +35,41 @@ std::string cameraFrame = "";
 
 int main(int argC,char **argV)
 {
-    ros::init(argC,argV,"startRGB");
-    ros::NodeHandle n(cameraName);
-    image_transport::ImageTransport imT(n);
-    std::string serverAddress;
-    n.getParam("/serverNameOrIP",serverAddress);
-    n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
-    "/rgb_frame", cameraFrame);
-    Socket mySocket(serverAddress.c_str(),"9000",streamSize);
-    image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
-        imageTopicSubName, 1);
-    camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
-    camInfoMgr.loadCameraInfo("");
-    cv::Mat frame;
-    cv_bridge::CvImage cvImage;
-    sensor_msgs::Image rosImage;
-    while(ros::ok())
-    {
-        printf("Got a frame.\n");
-        
-        mySocket.readData();
-        printf("Creating mat.\n");
-        frame = cv::Mat(cv::Size(1920,1080), CV_8UC3, mySocket.mBuffer);
-        cv::flip(frame,frame,1);
-        printf("Getting time.\n");
-        double utcTime;
-        memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
-        cvImage.header.frame_id = cameraFrame.c_str();
-        cvImage.encoding = "bgr8";
-        cvImage.image = frame;
-        cvImage.toImageMsg(rosImage);
-        sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
-        camInfo.header.frame_id = cvImage.header.frame_id;
-        printf("Updating.\n");
-        cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
-        ros::spinOnce();
-    }
-    return 0;
+	ros::init(argC,argV,"startRGB");
+	ros::NodeHandle n(cameraName);
+	image_transport::ImageTransport imT(n);
+	std::string serverAddress;
+	n.getParam("/serverNameOrIP",serverAddress);
+	n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
+	"/rgb_frame", cameraFrame);
+	Socket mySocket(serverAddress.c_str(),"9000",streamSize);
+	image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
+		imageTopicSubName, 1);
+	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
+	camInfoMgr.loadCameraInfo("");
+	cv::Mat frame;
+	cv_bridge::CvImage cvImage;
+	sensor_msgs::Image rosImage;
+	while(ros::ok())
+	{
+		printf("Got a frame.\n");
+		
+		mySocket.readData();
+		printf("Creating mat.\n");
+		frame = cv::Mat(cv::Size(1920,1080), CV_8UC3, mySocket.mBuffer);
+		cv::flip(frame,frame,1);
+		printf("Getting time.\n");
+		double utcTime;
+		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
+		cvImage.header.frame_id = cameraFrame.c_str();
+		cvImage.encoding = "bgr8";
+		cvImage.image = frame;
+		cvImage.toImageMsg(rosImage);
+		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
+		camInfo.header.frame_id = cvImage.header.frame_id;
+		printf("Updating.\n");
+		cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
+		ros::spinOnce();
+	}
+	return 0;
 }

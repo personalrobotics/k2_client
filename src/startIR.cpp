@@ -40,11 +40,11 @@ int main(int argC,char **argV)
 	image_transport::ImageTransport imT(n);
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
-    n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
-            "/ir_frame", cameraFrame);
-    Socket mySocket(serverAddress.c_str(),"9002",streamSize);
-    image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
-            imageTopicSubName, 1);
+	n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
+				"/ir_frame", cameraFrame);
+	Socket mySocket(serverAddress.c_str(),"9002",streamSize);
+	image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
+				imageTopicSubName, 1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
 	camInfoMgr.loadCameraInfo("");
 	cv::Mat frame;
@@ -63,7 +63,7 @@ int main(int argC,char **argV)
 		cvImage.toImageMsg(rosImage);
 		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
 		camInfo.header.frame_id = cvImage.header.frame_id;
-        cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
+		cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
 		ros::spinOnce();
 	}
 	return 0;
