@@ -30,9 +30,12 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include <iconv.h>
 
 std::string topicName = "bodyArray";
-size_t streamSize = 56008;
-size_t readSkipSize = 56000;
-size_t stringSize = 28000;
+// size_t streamSize = 56008;
+// size_t readSkipSize = 56000;
+// size_t stringSize = 28000;
+size_t streamSize = 80008;
+size_t readSkipSize = 80000;
+size_t stringSize = 40000;
 
 int main(int argC,char **argV)
 {
@@ -47,13 +50,13 @@ int main(int argC,char **argV)
     
     while(ros::ok())
     {
-        mySocket.readData();        
+        mySocket.readData();  
         char *jsonCharArrayPtr;
         char *socketCharArrayPtr;
         size_t readSkipSizeC = readSkipSize;
         size_t stringSizeloC= stringSize;
         jsonCharArrayPtr = jsonCharArray;
-        socketCharArrayPtr = mySocket.mBuffer;
+        socketCharArrayPtr = mySocket.mBuffer;        
         iconv(charConverter,&socketCharArrayPtr,&readSkipSizeC,&jsonCharArrayPtr,&stringSizeloC);
         double utcTime;
         memcpy(&utcTime,&mySocket.mBuffer[readSkipSizeC],sizeof(double));
@@ -61,14 +64,19 @@ int main(int argC,char **argV)
         Json::Value jsonObject;
         Json::Reader jsonReader;
         bool parsingSuccessful = jsonReader.parse(jsonString,jsonObject,false);
+    
         if(!parsingSuccessful)
         {
             ROS_ERROR("Failure to parse");
-            continue;
         }
+        
+        if (jsonObject.size() != 6)
+                    continue;
+
         k2_client::BodyArray bodyArray;
         try
         {
+            //ROS_ERROR("Parsing successulff");
             for(int i=0;i<6;i++)
             {
                 k2_client::Body body;
@@ -142,6 +150,7 @@ int main(int argC,char **argV)
                     body.jointOrientations.push_back(JOAT);
                     body.jointPositions.push_back(JPAS);
                 }
+                //std::cout << ros::Time::now() <<std::endl;
                 bodyArray.bodies.push_back(body);
             }
         }
@@ -151,6 +160,7 @@ int main(int argC,char **argV)
             continue;
         }
         bodyPub.publish(bodyArray);
+    
     }
     return 0;
 }
