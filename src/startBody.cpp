@@ -30,9 +30,6 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include <iconv.h>
 
 std::string topicName = "bodyArray";
-// size_t streamSize = 56008;
-// size_t readSkipSize = 56000;
-// size_t stringSize = 28000;
 size_t streamSize = 80008;
 size_t readSkipSize = 80000;
 size_t stringSize = 40000;
