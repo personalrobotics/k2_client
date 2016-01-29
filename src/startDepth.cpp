@@ -42,11 +42,11 @@ int main(int argC,char **argV)
 	image_transport::ImageTransport imT(n);
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
-    n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
-            "/depth_frame", cameraFrame);
+	n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
+				"/depth_frame", cameraFrame);
 	Socket mySocket(serverAddress.c_str(),"9001",streamSize);
-    image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
-            imageTopicSubName, 1);
+	image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
+				imageTopicSubName, 1);
 	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
 	camInfoMgr.loadCameraInfo("");
 	cv::Mat frame;
@@ -55,19 +55,19 @@ int main(int argC,char **argV)
 	while(ros::ok())
 	{
 		mySocket.readData();
-        // this alternate resolution was for an aligned depth image
+		// this alternate resolution was for an aligned depth image
 		//frame = cv::Mat(cv::Size(754,424),CV_16UC1,mySocket.mBuffer);
-        frame = cv::Mat(cv::Size(512,424), CV_16UC1,mySocket.mBuffer);
+		frame = cv::Mat(cv::Size(512,424), CV_16UC1,mySocket.mBuffer);
 		cv::flip(frame,frame,1);
 		double utcTime;
 		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
-        cvImage.header.frame_id = cameraFrame.c_str();
+		cvImage.header.frame_id = cameraFrame.c_str();
 		cvImage.encoding = "16UC1";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
 		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
 		camInfo.header.frame_id = cvImage.header.frame_id;
-        cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
+		cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
 		ros::spinOnce();
 	}
 	return 0;

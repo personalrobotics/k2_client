@@ -1,5 +1,6 @@
 <launch>
-    <param name="serverNameOrIP" value="172.19.179.123" />
+    <param name="serverNameOrIP" value="172.19.179.53" />
+    
     <group ns="/head/kinect2">
         <param name="rgb_frame" value="/head/kinect2/rgb"/>
         <param name="depth_frame" value="/head/kinect2/depth"/>
@@ -12,3 +13,5 @@
         <node name="startAudio" pkg="k2_client" type="startAudio"/>
     </group>
 </launch>
+
+
