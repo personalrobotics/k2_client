@@ -40,7 +40,7 @@ using namespace k2_client;
 
 constexpr size_t image_width = 512;
 constexpr size_t image_height = 424;
-constexpr size_t image_size = image_width * image_height * 2; // 16-bit depth image
+constexpr size_t image_size = image_width * image_height * 2; // 16-bit IR image
 constexpr size_t frame_size = image_size + sizeof(unsigned long); // image + timestamp 
 
 unsigned char frame_buffer[frame_size];
@@ -49,7 +49,7 @@ unsigned char frame_buffer[frame_size];
 int main(int argc, char *argv[])
 {
     // Initialize this ROS node.
-    ros::init(argc, argv, "k2_depth", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "k2_ir", ros::init_options::AnonymousName);
     ros::NodeHandle n("~");
 
     // Retrieve the hostname and port of the k2_server.

@@ -6,14 +6,14 @@ Authors: Anurag Jakhotia<ajakhoti@andrew.cmu.edu>, Prasanna Velagapudi<pkv@cs.cm
 Redistribution and use in source and binary forms, with or without modification, are 
 permitted provided that the following conditions are met:
 
- -	Redistributions of source code must retain the above copyright notice, this list 
- 	of conditions and the following disclaimer.
- -	Redistributions in binary form must reproduce the above copyright notice, this 
- 	list of conditions and the following disclaimer in the documentation and/or other 
- 	materials provided with the 	distribution.
- -	Neither the name of Carnegie Mellon University nor the names of its contributors 
- 	may be used to endorse or promote products derived from this software without 
- 	specific prior written 	permission.
+ -  Redistributions of source code must retain the above copyright notice, this list 
+    of conditions and the following disclaimer.
+ -  Redistributions in binary form must reproduce the above copyright notice, this 
+    list of conditions and the following disclaimer in the documentation and/or other 
+    materials provided with the     distribution.
+ -  Neither the name of Carnegie Mellon University nor the names of its contributors 
+    may be used to endorse or promote products derived from this software without 
+    specific prior written  permission.
  
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
 EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
@@ -27,49 +27,91 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 ***************************************************************************************/
 #include "k2_client/k2_client.h"
 
-int imageSize = 8294400;
-int streamSize = imageSize + sizeof(double);
-std::string cameraName = "rgb";
-std::string imageTopicSubName = "image_color";
-std::string cameraFrame = "";
+#include <camera_info_manager/camera_info_manager.h>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
+#include <yaml-cpp/yaml.h>
 
-int main(int argC,char **argV)
+using boost::asio::ip::tcp;
+using namespace k2_client;
+
+constexpr size_t image_width = 1920;
+constexpr size_t image_height = 1080;
+constexpr size_t image_size = image_width * image_height * 3; // 24-bit RGB image
+constexpr size_t frame_size = image_size + sizeof(unsigned long); // image + timestamp 
+
+unsigned char frame_buffer[frame_size];
+
+
+int main(int argc, char *argv[])
 {
-	ros::init(argC,argV,"startRGB");
-	ros::NodeHandle n(cameraName);
-	image_transport::ImageTransport imT(n);
-	std::string serverAddress;
-	n.getParam("/serverNameOrIP",serverAddress);
-	n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
-	"/rgb_frame", cameraFrame);
-	Socket mySocket(serverAddress.c_str(),"9000",streamSize);
-	image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
-		imageTopicSubName, 1);
-	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
-	camInfoMgr.loadCameraInfo("");
-	cv::Mat frame;
-	cv_bridge::CvImage cvImage;
-	sensor_msgs::Image rosImage;
-	while(ros::ok())
-	{
-		printf("Got a frame.\n");
-		
-		mySocket.readData();
-		printf("Creating mat.\n");
-		frame = cv::Mat(cv::Size(1920,1080), CV_8UC3, mySocket.mBuffer);
-		cv::flip(frame,frame,1);
-		printf("Getting time.\n");
-		double utcTime;
-		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
-		cvImage.header.frame_id = cameraFrame.c_str();
-		cvImage.encoding = "bgr8";
-		cvImage.image = frame;
-		cvImage.toImageMsg(rosImage);
-		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
-		camInfo.header.frame_id = cvImage.header.frame_id;
-		printf("Updating.\n");
-		cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
-		ros::spinOnce();
-	}
-	return 0;
+    // Initialize this ROS node.
+    ros::init(argc, argv, "k2_rgb", ros::init_options::AnonymousName);
+    ros::NodeHandle n("~");
+
+    // Retrieve the hostname and port of the k2_server.
+    std::string server_host, server_port, frame_id;
+    n.getParam("host", server_host);
+    n.param<std::string>("port", server_port, "9000"); // default for k2_server RGB
+    n.param<std::string>("frame_id", frame_id, "/k2/depth_frame");
+
+    // Create a Boost ASIO service to handle server connection.
+    boost::asio::io_service io_service;
+
+    // Get a list of endpoints corresponding to the server hostname and port.
+    tcp::resolver resolver(io_service);
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve({server_host, server_port});
+
+    // Try each endpoint until we successfully establish a connection.
+    tcp::socket socket(io_service);
+    try
+    {
+        boost::asio::connect(socket, endpoint_iterator);
+    }
+    catch (boost::system::system_error const& e)
+    {
+        ROS_FATAL("Failed to connect to k2 server '%s:%s': %s",
+                  server_host.c_str(), server_port.c_str(), e.what());
+        return -1;
+    }
+
+    // Create a ROS publisher for the deserialized stream output.
+    image_transport::ImageTransport image_transport(n);
+    image_transport::CameraPublisher camera_publisher =
+        image_transport.advertiseCamera("image", 1);
+    camera_info_manager::CameraInfoManager camera_info_manager(n, "rgb");
+    camera_info_manager.loadCameraInfo("");
+    cv::Mat image(cv::Size(image_width, image_height), CV_8UC3, frame_buffer);
+
+    while(ros::ok())
+    {
+        // Read the next image from the server.
+        boost::asio::read(socket, boost::asio::buffer(frame_buffer, frame_size));
+
+        // Extract the timestamp (packed at end of image).
+        unsigned long timestamp = *reinterpret_cast<unsigned long *>(&frame_buffer[image_size]);
+
+        // Extract the image from the buffer
+        cv::flip(image, image, 1);
+
+        cv_bridge::CvImage cv_image;
+        cv_image.header.frame_id = frame_id;
+        cv_image.encoding = "bgr8";
+        cv_image.image = image;
+
+        sensor_msgs::Image ros_image;
+        cv_image.toImageMsg(ros_image);
+
+        sensor_msgs::CameraInfo camera_info = camera_info_manager.getCameraInfo();
+        camera_info.header.frame_id = cv_image.header.frame_id;
+
+        // Send out the resulting message.
+        camera_publisher.publish(ros_image, camera_info, ros::Time(timestamp));
+        ros::spinOnce();
+    }
+
+    return 0;
 }
