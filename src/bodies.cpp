@@ -28,10 +28,8 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include "k2_client/k2_client.h"
 #include "k2_client/BodyArray.h"
 
-#include <iostream>
 #include <ros/ros.h>
-#include <signal.h>
-#include <vector>
+#include <array>
 #include <yaml-cpp/yaml.h>
 
 using boost::asio::ip::tcp;
@@ -59,11 +57,11 @@ int main(int argc, char *argv[])
     std::string server_host, server_port, frame_id;
     n.getParam("host", server_host);
     n.param<std::string>("port", server_port, "9003"); // default for k2_server bodies
-    n.param<std::string>("frame_id", frame_id, "/k2/depth"); // default for k2_server bodies
+    n.param<std::string>("frame_id", frame_id, "/k2/depth_frame");
 
     // Create a Boost ASIO service to handle server connection.
     boost::asio::io_service io_service;
-    
+
     // Get a list of endpoints corresponding to the server hostname and port.
     tcp::resolver resolver(io_service);
     tcp::resolver::iterator endpoint_iterator = resolver.resolve({server_host, server_port});
@@ -87,9 +85,9 @@ int main(int argc, char *argv[])
     while(ros::ok())
     {
         // Read the next line from the server.
-        boost::asio::streambuf response;
-        boost::asio::read_until(socket, response, "\n");
-        const std::string message = asioBufferToString(response);
+        boost::asio::streambuf buffer;
+        boost::asio::read_until(socket, buffer, "\n");
+        const std::string message = asioBufferToString(buffer);
         const YAML::Node node = YAML::Load(message);
         if (!node)
         {
@@ -126,7 +124,7 @@ int main(int argc, char *argv[])
             body.activities.lookingAway =    body_node["Activities"]["LookingAway"].as<int>();
             body.expressions.neutral =       body_node["Expressions"]["Neutral"].as<int>();
             body.expressions.neutral =       body_node["Expressions"]["Happy"].as<int>();
-            
+
             for (const std::string joint_name : joint_names)
             {
                 k2_client::JointPositionAndState JPAS;
@@ -151,6 +149,7 @@ int main(int argc, char *argv[])
 
         // Send out the resulting message.
         bodyPublisher.publish(body_array);
+        ros::spinOnce();
     }
 
     return 0;
