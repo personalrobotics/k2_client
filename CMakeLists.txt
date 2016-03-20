@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(k2_client)
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
@@ -9,7 +9,12 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 
-find_package(Jsoncpp REQUIRED)
+set(YAMLCPP_STATIC_LIBRARY ON CACHE BOOL
+    "If true, try to find static yaml-cpp library first instead of dynamic.")
+find_package(YamlCpp REQUIRED)
+include_directories(${YAMLCPP_INCLUDE_DIRS})
+add_definitions(${YAMLCPP_DEFINITIONS})
+
 find_package(catkin REQUIRED COMPONENTS
     rospy
     roscpp
@@ -40,48 +45,49 @@ generate_messages(DEPENDENCIES
 
 catkin_package(
     INCLUDE_DIRS include
-    #LIBRARIES
-    #    ${PROJECT_NAME}
     CATKIN_DEPENDS
         geometry_msgs
         std_msgs
         message_runtime
     DEPENDS
-        Jsoncpp
+        yaml-cpp
 )
 
 # Set the default path for built executables to the "bin" directory.
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/bin")
+
 # Set the default path for built libraries to the "lib" directory.
 set(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/lib")
+
+# Enable C++11.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wno-unused-parameter")
 
 include_directories(SYSTEM
     "${PROJECT_SOURCE_DIR}/include"
     ${catkin_INCLUDE_DIRS}
-    ${JSONCPP_INCLUDE_DIR}
 )
 
 link_directories(
     ${catkin_LIBRARY_DIRS}
 )
 
-add_executable(startAudio "${PROJECT_SOURCE_DIR}/src/startAudio.cpp")
-add_executable(startBody  "${PROJECT_SOURCE_DIR}/src/startBody.cpp")
-add_executable(startDepth "${PROJECT_SOURCE_DIR}/src/startDepth.cpp")
-add_executable(startIR    "${PROJECT_SOURCE_DIR}/src/startIR.cpp")
-add_executable(startRGB   "${PROJECT_SOURCE_DIR}/src/startRGB.cpp")
+add_executable(audio "${PROJECT_SOURCE_DIR}/src/audio.cpp")
+add_executable(bodies  "${PROJECT_SOURCE_DIR}/src/bodies.cpp")
+#add_executable(depth "${PROJECT_SOURCE_DIR}/src/depth.cpp")
+#add_executable(ir    "${PROJECT_SOURCE_DIR}/src/ir.cpp")
+#add_executable(rgb   "${PROJECT_SOURCE_DIR}/src/rgb.cpp")
 
-add_dependencies(startAudio ${k2_client_EXPORTED_TARGETS})
-add_dependencies(startBody  ${k2_client_EXPORTED_TARGETS})
-add_dependencies(startDepth ${k2_client_EXPORTED_TARGETS})
-add_dependencies(startIR    ${k2_client_EXPORTED_TARGETS})
-add_dependencies(startRGB   ${k2_client_EXPORTED_TARGETS})
+add_dependencies(audio ${k2_client_EXPORTED_TARGETS})
+add_dependencies(bodies  ${k2_client_EXPORTED_TARGETS})
+#add_dependencies(depth ${k2_client_EXPORTED_TARGETS})
+#add_dependencies(ir    ${k2_client_EXPORTED_TARGETS})
+#add_dependencies(rgb   ${k2_client_EXPORTED_TARGETS})
 
-target_link_libraries(startAudio ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
-target_link_libraries(startBody  ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
-target_link_libraries(startDepth ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
-target_link_libraries(startIR    ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
-target_link_libraries(startRGB   ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
+target_link_libraries(audio ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(bodies  ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+#target_link_libraries(depth ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+#target_link_libraries(ir    ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+#target_link_libraries(rgb   ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
 
 
 
