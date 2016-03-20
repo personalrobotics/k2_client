@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         image_transport.advertiseCamera("image", 1);
     camera_info_manager::CameraInfoManager camera_info_manager(n, "depth");
     camera_info_manager.loadCameraInfo("");
-    cv::Mat depth_frame(cv::Size(image_width, image_height), CV_16UC1, frame_buffer);
+    cv::Mat image(cv::Size(image_width, image_height), CV_16UC1, frame_buffer);
 
     while(ros::ok())
     {
@@ -95,12 +95,12 @@ int main(int argc, char *argv[])
         unsigned long timestamp = *reinterpret_cast<unsigned long *>(&frame_buffer[image_size]);
 
         // Extract the image from the buffer
-        cv::flip(depth_frame, depth_frame, 1);
+        cv::flip(image, image, 1);
 
         cv_bridge::CvImage cv_image;
         cv_image.header.frame_id = frame_id;
         cv_image.encoding = "16UC1";
-        cv_image.image = depth_frame;
+        cv_image.image = image;
 
         sensor_msgs::Image ros_image;
         cv_image.toImageMsg(ros_image);
