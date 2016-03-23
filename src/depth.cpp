@@ -108,8 +108,9 @@ int main(int argc, char *argv[])
         sensor_msgs::CameraInfo camera_info = camera_info_manager.getCameraInfo();
         camera_info.header.frame_id = cv_image.header.frame_id;
 
-        // Send out the resulting message.
+        // Send out the resulting message and request a new message.
         camera_publisher.publish(ros_image, camera_info, ros::Time(timestamp));
+        boost::asio::write(socket, boost::asio::buffer("OK\n"));
         ros::spinOnce();
     }
 

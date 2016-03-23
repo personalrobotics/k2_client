@@ -98,8 +98,9 @@ int main(int argc, char *argv[])
         audio.frameLifeTime = node["frameLifeTime"].as<double>();
         audio.samplingFrequency = node["samplingFrequency"].as<unsigned>();
 
-        // Send out the resulting audio message.
+        // Send out the resulting message and request a new message.
         audioPublisher.publish(audio);
+        boost::asio::write(socket, boost::asio::buffer("OK\n"));
         ros::spinOnce();
     }
 

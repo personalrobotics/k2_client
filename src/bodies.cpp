@@ -147,8 +147,9 @@ int main(int argc, char *argv[])
             body_array.bodies.push_back(body);
         }
 
-        // Send out the resulting message.
+        // Send out the resulting message and request a new message.
         bodyPublisher.publish(body_array);
+        boost::asio::write(socket, boost::asio::buffer("OK\n"));
         ros::spinOnce();
     }
 

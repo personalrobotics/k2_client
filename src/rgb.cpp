@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     std::string server_host, server_port, frame_id;
     n.getParam("host", server_host);
     n.param<std::string>("port", server_port, "9000"); // default for k2_server RGB
-    n.param<std::string>("frame_id", frame_id, "/k2/depth_frame");
+    n.param<std::string>("frame_id", frame_id, "/k2/rgb_frame");
 
     // Create a Boost ASIO service to handle server connection.
     boost::asio::io_service io_service;
@@ -108,8 +108,9 @@ int main(int argc, char *argv[])
         sensor_msgs::CameraInfo camera_info = camera_info_manager.getCameraInfo();
         camera_info.header.frame_id = cv_image.header.frame_id;
 
-        // Send out the resulting message.
+        // Send out the resulting message and request a new message.
         camera_publisher.publish(ros_image, camera_info, ros::Time(timestamp));
+        boost::asio::write(socket, boost::asio::buffer("OK\n"));
         ros::spinOnce();
     }
 
