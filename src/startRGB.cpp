@@ -28,7 +28,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include "k2_client/k2_client.h"
 
 int imageSize = 1920 * 1080 * 4;
-int streamSize = imageSize + sizeof(double);
+int streamSize = imageSize;
 std::string cameraName = "rgb";
 std::string imageTopicSubName = "image_color";
 std::string cameraFrame = "";
@@ -43,34 +43,21 @@ int main(int argC,char **argV)
     n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
             "/rgb_frame", cameraFrame);
 	Socket mySocket(serverAddress.c_str(),"9000",streamSize);
-    image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
-            imageTopicSubName, 1);
-	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
-	camInfoMgr.loadCameraInfo("");
+    image_transport::Publisher imagePublisher = imT.advertise(imageTopicSubName, 1);
 	cv::Mat frame;
 	cv_bridge::CvImage cvImage;
 	sensor_msgs::Image rosImage;
 	while(ros::ok())
 	{
-        printf("Got a frame.\n");
-
 		mySocket.readData();
-        printf("Creating mat.\n");
         frame = cv::Mat(cv::Size(1920, 1080), CV_8UC4, mySocket.mBuffer);
         cv::cvtColor(frame, frame, CV_BGRA2BGR);
 		cv::flip(frame,frame,1);
-        printf("Getting time.\n");
-		double utcTime;
-		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
         cvImage.header.frame_id = cameraFrame.c_str();
-        printf("%s\n", cameraFrame.c_str());
 		cvImage.encoding = "bgr8";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
-		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
-		camInfo.header.frame_id = cvImage.header.frame_id;
-        printf("Updating.\n");
-        cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
+        imagePublisher.publish(rosImage);
 		ros::spinOnce();
 	}
 	return 0;
