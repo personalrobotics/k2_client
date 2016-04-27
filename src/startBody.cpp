@@ -28,11 +28,12 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include "k2_client/k2_client.h"
 #include "k2_client/BodyArray.h"
 #include <iconv.h>
+#include <cstdio>
 
 std::string topicName = "bodyArray";
-size_t streamSize = 56008;
-size_t readSkipSize = 56000;
-size_t stringSize = 28000;
+size_t streamSize = 60000;
+size_t readSkipSize = 60000;
+size_t stringSize = 30000;
 
 int main(int argC,char **argV)
 {
@@ -41,21 +42,11 @@ int main(int argC,char **argV)
     std::string serverAddress;
     n.getParam("/serverNameOrIP",serverAddress);
     Socket mySocket(serverAddress.c_str(),"9003",streamSize);
-    iconv_t charConverter = iconv_open("UTF-8","UTF-16");
     ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
-    char jsonCharArray[readSkipSize];
-   
     while(ros::ok())
     {
         mySocket.readData();        
-        char *jsonCharArrayPtr;
-        char *socketCharArrayPtr;
-        jsonCharArrayPtr = jsonCharArray;
-        socketCharArrayPtr = mySocket.mBuffer;
-        iconv(charConverter,&socketCharArrayPtr,&readSkipSize,&jsonCharArrayPtr,&stringSize);
-        double utcTime;
-        memcpy(&utcTime,&mySocket.mBuffer[readSkipSize],sizeof(double));
-        std::string jsonString(jsonCharArray);
+        std::string jsonString(mySocket.mBuffer);
         Json::Value jsonObject;
         Json::Reader jsonReader;
         bool parsingSuccessful = jsonReader.parse(jsonString,jsonObject,false);
@@ -70,12 +61,15 @@ int main(int argC,char **argV)
             for(int i=0;i<6;i++)
             {
                 k2_client::Body body;
-                body.header.stamp = ros::Time(utcTime);
+                body.header.stamp = ros::Time::now();
                 body.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/depthFrame";
                 body.leanTrackingState = jsonObject[i]["LeanTrackingState"].asInt();
                 body.lean.leanX = jsonObject[i]["Lean"]["X"].asDouble();
                 body.lean.leanY = jsonObject[i]["Lean"]["Y"].asDouble();
                 body.isTracked = jsonObject[i]["IsTracked"].asBool();
+                if (!body.isTracked) {
+                    continue;
+                }
                 body.trackingId = jsonObject[i]["TrackingId"].asUInt64();
                 body.clippedEdges = jsonObject[i]["ClippedEdges"].asInt();
                 body.engaged = jsonObject[i]["Engaged"].asBool();
@@ -148,7 +142,8 @@ int main(int argC,char **argV)
             ROS_ERROR("An exception occured");
             continue;
         }
-        bodyPub.publish(bodyArray);
+        if (bodyArray.bodies.size() > 0) 
+            bodyPub.publish(bodyArray);
     }
     return 0;
 }

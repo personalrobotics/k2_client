@@ -1,5 +1,5 @@
 <launch>
-    <param name="serverNameOrIP" value="192.168.236.1" />
+    <param name="serverNameOrIP" value="192.168.2.5" />
     <group ns="/head/kinect2">
         <param name="rgb_frame" value="/head/kinect2/rgb"/>
         <param name="depth_frame" value="/head/kinect2/depth"/>
@@ -7,7 +7,6 @@
         
         <node name="startRGB" pkg="k2_client" type="startRGB"/>
         <node name="startDepth" pkg="k2_client" type="startDepth" output="screen"/>
-        <!--node name="startBody" pkg="k2_client" type="startBody"/>
-        <node name="startAudio" pkg="k2_client" type="startAudio"/-->
+        <node name="startBody" pkg="k2_client" type="startBody" output="screen"/>
     </group>
 </launch>
