@@ -35,30 +35,30 @@ std::string cameraFrame = "";
 
 int main(int argC,char **argV)
 {
-	ros::init(argC,argV,"startRGB");
-	ros::NodeHandle n(cameraName);
-	image_transport::ImageTransport imT(n);
-	std::string serverAddress;
-	n.getParam("/serverNameOrIP",serverAddress);
+    ros::init(argC,argV,"startRGB");
+    ros::NodeHandle n(cameraName);
+    image_transport::ImageTransport imT(n);
+    std::string serverAddress;
+    n.getParam("/serverNameOrIP",serverAddress);
     n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
             "/rgb_frame", cameraFrame);
-	Socket mySocket(serverAddress.c_str(),"9000",streamSize);
+    Socket mySocket(serverAddress.c_str(),"9000",streamSize);
     image_transport::Publisher imagePublisher = imT.advertise(imageTopicSubName, 1);
-	cv::Mat frame;
-	cv_bridge::CvImage cvImage;
-	sensor_msgs::Image rosImage;
-	while(ros::ok())
-	{
-		mySocket.readData();
+    cv::Mat frame;
+    cv_bridge::CvImage cvImage;
+    sensor_msgs::Image rosImage;
+    while(ros::ok())
+    {
+        mySocket.readData();
         frame = cv::Mat(cv::Size(1920, 1080), CV_8UC4, mySocket.mBuffer);
         cv::cvtColor(frame, frame, CV_BGRA2BGR);
-		cv::flip(frame,frame,1);
+        cv::flip(frame,frame,0);
         cvImage.header.frame_id = cameraFrame.c_str();
 		cvImage.encoding = "bgr8";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
         imagePublisher.publish(rosImage);
 		ros::spinOnce();
-	}
-	return 0;
+    }
+    return 0;
 }
