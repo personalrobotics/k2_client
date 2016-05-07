@@ -68,22 +68,22 @@ int main(int argC,char **argV)
                 face.facePointsInColorSpace.mouthCornerRightX = jsonObject[i]["FacePointsInColorSpace"]["MouthCornerRight"]["X"].asDouble();
                 face.facePointsInColorSpace.mouthCornerRightY = jsonObject[i]["FacePointsInColorSpace"]["MouthCornerRight"]["Y"].asDouble();
                 
-                face.faceBoundingBoxInInfraredSpace.left   = jsonObject[i]["FaceBoundingBoxInInfraredSpace"]["Left"].asDouble();
-                face.faceBoundingBoxInInfraredSpace.top    = jsonObject[i]["FaceBoundingBoxInInfraredSpace"]["Top"].asDouble();
-                face.faceBoundingBoxInInfraredSpace.right  = jsonObject[i]["FaceBoundingBoxInInfraredSpace"]["Right"].asDouble();
-                face.faceBoundingBoxInInfraredSpace.bottom = jsonObject[i]["FaceBoundingBoxInInfraredSpace"]["Bottom"].asDouble();
+                face.faceBoundingBoxInInfraredSpace.left   = jsonObject[i]["FaceBoundingBoxInInfraredSpace"]["Left"].asInt();
+                face.faceBoundingBoxInInfraredSpace.top    = jsonObject[i]["FaceBoundingBoxInInfraredSpace"]["Top"].asInt();
+                face.faceBoundingBoxInInfraredSpace.right  = jsonObject[i]["FaceBoundingBoxInInfraredSpace"]["Right"].asInt();
+                face.faceBoundingBoxInInfraredSpace.bottom = jsonObject[i]["FaceBoundingBoxInInfraredSpace"]["Bottom"].asInt();
                 
-                face.FaceBoundingBoxInColorSpace.left   = jsonObject[i]["FaceBoundingBoxInColorSpace"]["Left"].asDouble();
-                face.FaceBoundingBoxInColorSpace.top    = jsonObject[i]["FaceBoundingBoxInColorSpace"]["Top"].asDouble();
-                face.FaceBoundingBoxInColorSpace.right  = jsonObject[i]["FaceBoundingBoxInColorSpace"]["Right"].asDouble();
-                face.FaceBoundingBoxInColorSpace.bottom = jsonObject[i]["FaceBoundingBoxInColorSpace"]["Bottom"].asDouble();
+                face.faceBoundingBoxInColorSpace.left   = jsonObject[i]["FaceBoundingBoxInColorSpace"]["Left"].asInt();
+                face.faceBoundingBoxInColorSpace.top    = jsonObject[i]["FaceBoundingBoxInColorSpace"]["Top"].asInt();
+                face.faceBoundingBoxInColorSpace.right  = jsonObject[i]["FaceBoundingBoxInColorSpace"]["Right"].asInt();
+                face.faceBoundingBoxInColorSpace.bottom = jsonObject[i]["FaceBoundingBoxInColorSpace"]["Bottom"].asInt();
                 
                 face.faceRotationQuaternion.X = jsonObject[i]["FaceRotationQuaternion"]["X"].asDouble();
                 face.faceRotationQuaternion.Y = jsonObject[i]["FaceRotationQuaternion"]["Y"].asDouble();
                 face.faceRotationQuaternion.Z = jsonObject[i]["FaceRotationQuaternion"]["Z"].asDouble();
                 face.faceRotationQuaternion.W = jsonObject[i]["FaceRotationQuaternion"]["W"].asDouble();
                 
-                face.trackingId = jsonObject[i]["TrackingId"].asInt();
+                //face.trackingId = jsonObject[i]["TrackingId"].asInt();
                 face.faceFrameFeatures = jsonObject[i]["FaceFrameFeatures"].asInt();
                 
                 faceArray.faces.push_back(face);
