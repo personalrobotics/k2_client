@@ -26,11 +26,16 @@ add_message_files(FILES
     Appearance.msg
     Audio.msg    
     BodyArray.msg
+    Body.msg
+    BoundingBox2D.msg
     Expressions.msg
+    FaceArray.msg
+    Face.msg
+    FacePoints.msg
     JointOrientationAndType.msg
     JointPositionAndState.msg
     Lean.msg
-    Body.msg
+    Quaternion.msg
 )
 
 generate_messages(DEPENDENCIES
@@ -70,18 +75,22 @@ add_executable(startBody  "${PROJECT_SOURCE_DIR}/src/startBody.cpp")
 add_executable(startDepth "${PROJECT_SOURCE_DIR}/src/startDepth.cpp")
 add_executable(startIR    "${PROJECT_SOURCE_DIR}/src/startIR.cpp")
 add_executable(startRGB   "${PROJECT_SOURCE_DIR}/src/startRGB.cpp")
+add_executable(startFace  "${PROJECT_SOURCE_DIR}/src/startFace.cpp")
 
 add_dependencies(startAudio ${k2_client_EXPORTED_TARGETS})
 add_dependencies(startBody  ${k2_client_EXPORTED_TARGETS})
 add_dependencies(startDepth ${k2_client_EXPORTED_TARGETS})
 add_dependencies(startIR    ${k2_client_EXPORTED_TARGETS})
 add_dependencies(startRGB   ${k2_client_EXPORTED_TARGETS})
+add_dependencies(startFace  ${k2_client_EXPORTED_TARGETS})
 
 target_link_libraries(startAudio ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
 target_link_libraries(startBody  ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
 target_link_libraries(startDepth ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
 target_link_libraries(startIR    ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
 target_link_libraries(startRGB   ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
+target_link_libraries(startFace  ${JSONCPP_LIBRARY} ${catkin_LIBRARIES})
+
 
 
 
