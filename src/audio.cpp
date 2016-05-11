@@ -26,15 +26,13 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
 WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************************/
-#include "k2_client/k2_client.h"
 #include "k2_client/Audio.h"
 
+#include <boost/asio.hpp>
 #include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
 using boost::asio::ip::tcp;
-using namespace k2_client;
-
 
 int main(int argc, char *argv[])
 {
@@ -50,6 +48,9 @@ int main(int argc, char *argv[])
 
     // Create a Boost ASIO service to handle server connection.
     boost::asio::io_service io_service;
+
+    // Create a Boost ASIO stream buffer to hold the unparsed input from the server.
+    boost::asio::streambuf buffer;
 
     // Get a list of endpoints corresponding to the server hostname and port.
     tcp::resolver resolver(io_service);
@@ -75,9 +76,12 @@ int main(int argc, char *argv[])
     while(ros::ok())
     {
         // Read the next line from the server.
-        boost::asio::streambuf buffer;
         boost::asio::read_until(socket, buffer, "\n");
-        const std::string message = asioBufferToString(buffer);
+        std::istream is(&buffer);
+        std::string message;
+        std::getline(is, message);
+
+        // Parse the line from the server as JSON/YAML.
         const YAML::Node node = YAML::Load(message);
         if (!node)
         {
