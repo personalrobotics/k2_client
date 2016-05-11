@@ -1,7 +1,7 @@
 /*************************************************************************************
 Copyright (c) 2013, Carnegie Mellon University
 All rights reserved.
-Authors: Anurag Jakhotia<ajakhoti@andrew.cmu.edu>, Prasanna Velagapudi<pkv@cs.cmu.edu>
+Authors: Henny Admoni<hadmoni@andrew.cmu.edu>, Prasanna Velagapudi<pkv@cs.cmu.edu>
 
 Redistribution and use in source and binary forms, with or without modification, are 
 permitted provided that the following conditions are met:
@@ -25,7 +25,7 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
 WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************************/
-#include "k2_client/BodyArray.h"
+#include "k2_client/Face.h"
 
 #include <boost/asio.hpp>
 #include <ros/ros.h>
@@ -34,27 +34,17 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 
 using boost::asio::ip::tcp;
 
-const std::array<std::string, 25> joint_names = {
-    "SpineBase", "SpineMid", "SpineShoulder", "Neck", "Head",
-    "ShoulderLeft", "ElbowLeft", "WristLeft", "HandLeft",
-    "ShoulderRight", "ElbowRight", "WristRight", "HandRight",
-    "HipLeft", "KneeLeft", "AnkleLeft", "FootLeft",
-    "HipRight", "KneeRight", "AnkleRight", "FootRight",
-    "HandTipLeft", "ThumbLeft",
-    "HandTipRight", "ThumbRight"
-};
-
 
 int main(int argc, char *argv[])
 {
     // Initialize this ROS node.
-    ros::init(argc, argv, "k2_body", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "k2_face", ros::init_options::AnonymousName);
     ros::NodeHandle n("~");
 
     // Retrieve the hostname and port of the k2_server.
     std::string server_host, server_port, frame_id;
     n.getParam("host", server_host);
-    n.param<std::string>("port", server_port, "9003"); // default for k2_server bodies
+    n.param<std::string>("port", server_port, "9005"); // default for k2_server faces
     n.param<std::string>("frame_id", frame_id, "/k2/depth_frame");
 
     // Create a Boost ASIO service to handle server connection.
@@ -81,7 +71,7 @@ int main(int argc, char *argv[])
     }
 
     // Create a ROS publisher for the deserialized stream output.
-    ros::Publisher bodyPublisher = n.advertise<k2_client::BodyArray>("bodies", 1);
+    ros::Publisher facePublisher = n.advertise<k2_client::Face>("faces", 1);
 
     while(ros::ok())
     {
@@ -99,50 +89,47 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        const YAML::Node alignment = node["Alignment"];
+        const YAML::Node animation_units = alignment["AnimationUnits"];
+
         // Convert the JSON message to a ROS message.
-        const YAML::Node bodies_node = node["Bodies"];
-        k2_client::BodyArray body_array;
+        k2_client::Face face;
 
-        for (const YAML::Node &body_node : bodies_node)
-        {
-            k2_client::Body body;
+        face.header.stamp =            ros::Time(node["Time"].as<unsigned long>());
+        face.header.frame_id =         frame_id;
+        face.trackingId =              node["TrackingId"].as<unsigned long>();
 
-            body.header.stamp =              ros::Time(node["Time"].as<unsigned long>());
-            body.header.frame_id =           frame_id;
-            body.leanTrackingState =         body_node["LeanTrackingState"].as<int>();
-            body.lean.leanX =                body_node["Lean"]["X"].as<double>();
-            body.lean.leanY =                body_node["Lean"]["Y"].as<double>();
-            body.trackingId =                body_node["TrackingId"].as<unsigned long>();
-            body.clippedEdges =              body_node["ClippedEdges"].as<int>();
-            body.handRightConfidence =       body_node["HandRightConfidence"].as<int>();
-            body.handRightState =            body_node["HandRightState"].as<int>();
-            body.handLeftConfidence =        body_node["HandLeftConfidence"].as<int>();
-            body.handLeftState =             body_node["HandLeftState"].as<int>();
+        face.jawOpen =                 animation_units["JawOpen"].as<double>();
+        face.lipPucker =               animation_units["LipPucker"].as<double>();
+        face.jawSlideRight =           animation_units["JawSlideRight"].as<double>();
+        face.lipStretcherRight =       animation_units["LipStretcherRight"].as<double>();
+        face.lipStretcherLeft =        animation_units["LipStretcherLeft"].as<double>();
+        face.lipCornerPullerLeft =     animation_units["LipCornerPullerLeft"].as<double>();
+        face.lipCornerPullerRight =    animation_units["LipCornerPullerRight"].as<double>();
+        face.lipCornerDepressorLeft =  animation_units["LipCornerDepressorLeft"].as<double>();
+        face.lipCornerDepressorRight = animation_units["LipCornerDepressorRight"].as<double>();
+        face.leftCheekPuff =           animation_units["LeftcheekPuff"].as<double>();
+        face.rightCheekPuff =          animation_units["RightcheekPuff"].as<double>();
+        face.leftEyeClosed =           animation_units["LefteyeClosed"].as<double>();
+        face.rightEyeClosed =          animation_units["RighteyeClosed"].as<double>();
+        face.leftEyebrowLowerer =      animation_units["LefteyebrowLowerer"].as<double>();
+        face.rightEyebrowLowerer =     animation_units["RighteyebrowLowerer"].as<double>();
+        face.lowerLipDepressorLeft =   animation_units["LowerlipDepressorLeft"].as<double>();
+        face.lowerLipDepressorRight =  animation_units["LowerlipDepressorRight"].as<double>();
+        face.lowerLipDepressorLeft =   animation_units["LowerlipDepressorLeft"].as<double>();
+        face.lowerLipDepressorLeft =   animation_units["LowerlipDepressorLeft"].as<double>();
+        
+        face.headPivotPoint.x =        alignment["HeadPivotPoint"]["X"].as<double>();
+        face.headPivotPoint.y =        alignment["HeadPivotPoint"]["Y"].as<double>();
+        face.headPivotPoint.z =        alignment["HeadPivotPoint"]["Z"].as<double>();
 
-            for (const std::string joint_name : joint_names)
-            {
-                k2_client::JointPositionAndState JPAS;
-                JPAS.trackingState = body_node["Joints"][joint_name]["TrackingState"].as<int>();
-                JPAS.position.x =    body_node["Joints"][joint_name]["Position"]["X"].as<double>();
-                JPAS.position.y =    body_node["Joints"][joint_name]["Position"]["Y"].as<double>();
-                JPAS.position.z =    body_node["Joints"][joint_name]["Position"]["Z"].as<double>();
-                JPAS.jointType =     body_node["Joints"][joint_name]["JointType"].as<int>();
-                body.jointPositions.push_back(JPAS);
-
-                k2_client::JointOrientationAndType JOAT;
-                JOAT.orientation.x = body_node["JointOrientations"][joint_name]["Orientation"]["X"].as<double>();
-                JOAT.orientation.y = body_node["JointOrientations"][joint_name]["Orientation"]["Y"].as<double>();
-                JOAT.orientation.z = body_node["JointOrientations"][joint_name]["Orientation"]["Z"].as<double>();
-                JOAT.orientation.w = body_node["JointOrientations"][joint_name]["Orientation"]["W"].as<double>();
-                JOAT.jointType =     body_node["JointOrientations"][joint_name]["JointType"].as<int>();
-                body.jointOrientations.push_back(JOAT);                
-            }
-
-            body_array.bodies.push_back(body);
-        }
+        face.faceOrientation.x =       alignment["FaceOrientation"]["X"].as<double>();
+        face.faceOrientation.y =       alignment["FaceOrientation"]["Y"].as<double>();
+        face.faceOrientation.z =       alignment["FaceOrientation"]["Z"].as<double>();
+        face.faceOrientation.w =       alignment["FaceOrientation"]["W"].as<double>();
 
         // Send out the resulting message and request a new message.
-        bodyPublisher.publish(body_array);
+        facePublisher.publish(face);
         boost::asio::write(socket, boost::asio::buffer("OK\n"));
         ros::spinOnce();
     }

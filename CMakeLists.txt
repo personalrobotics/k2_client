@@ -26,15 +26,13 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 add_message_files(FILES
-    Activities.msg
-    Appearance.msg
     Audio.msg    
     BodyArray.msg
-    Expressions.msg
     JointOrientationAndType.msg
     JointPositionAndState.msg
     Lean.msg
     Body.msg
+    Face.msg
 )
 
 generate_messages(DEPENDENCIES
@@ -43,7 +41,6 @@ generate_messages(DEPENDENCIES
 )
 
 catkin_package(
-    INCLUDE_DIRS include
     CATKIN_DEPENDS
         geometry_msgs
         std_msgs
@@ -62,7 +59,6 @@ set(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/lib")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wno-unused-parameter")
 
 include_directories(SYSTEM
-    "${PROJECT_SOURCE_DIR}/include"
     ${catkin_INCLUDE_DIRS}
 )
 
@@ -75,15 +71,18 @@ add_executable(bodies "${PROJECT_SOURCE_DIR}/src/bodies.cpp")
 add_executable(depth  "${PROJECT_SOURCE_DIR}/src/depth.cpp")
 add_executable(ir     "${PROJECT_SOURCE_DIR}/src/ir.cpp")
 add_executable(rgb    "${PROJECT_SOURCE_DIR}/src/rgb.cpp")
+add_executable(faces  "${PROJECT_SOURCE_DIR}/src/faces.cpp")
 
 add_dependencies(audio  ${k2_client_EXPORTED_TARGETS})
 add_dependencies(bodies ${k2_client_EXPORTED_TARGETS})
+add_dependencies(faces  ${k2_client_EXPORTED_TARGETS})
 add_dependencies(depth  ${k2_client_EXPORTED_TARGETS})
 add_dependencies(ir     ${k2_client_EXPORTED_TARGETS})
 add_dependencies(rgb    ${k2_client_EXPORTED_TARGETS})
 
 target_link_libraries(audio  ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(bodies ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(faces  ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(depth  ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(ir     ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(rgb    ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
