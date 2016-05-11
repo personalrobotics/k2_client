@@ -1,7 +1,7 @@
 /*************************************************************************************
 Copyright (c) 2013, Carnegie Mellon University
 All rights reserved.
-Authors: Anurag Jakhotia<ajakhoti@andrew.cmu.edu>, Prasanna Velagapudi<pkv@cs.cmu.edu>
+Authors: Henny Admoni<hadmoni@andrew.cmu.edu>, Prasanna Velagapudi<pkv@cs.cmu.edu>
 
 Redistribution and use in source and binary forms, with or without modification, are 
 permitted provided that the following conditions are met:
@@ -33,16 +33,6 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include <yaml-cpp/yaml.h>
 
 using boost::asio::ip::tcp;
-
-const std::array<std::string, 25> joint_names = {
-    "SpineBase", "SpineMid", "SpineShoulder", "Neck", "Head",
-    "ShoulderLeft", "ElbowLeft", "WristLeft", "HandLeft",
-    "ShoulderRight", "ElbowRight", "WristRight", "HandRight",
-    "HipLeft", "KneeLeft", "AnkleLeft", "FootLeft",
-    "HipRight", "KneeRight", "AnkleRight", "FootRight",
-    "HandTipLeft", "ThumbLeft",
-    "HandTipRight", "ThumbRight"
-};
 
 
 int main(int argc, char *argv[])
@@ -137,9 +127,7 @@ int main(int argc, char *argv[])
         face.faceOrientation.y =       alignment["FaceOrientation"]["Y"].as<double>();
         face.faceOrientation.z =       alignment["FaceOrientation"]["Z"].as<double>();
         face.faceOrientation.w =       alignment["FaceOrientation"]["W"].as<double>();
-                
 
-         
         // Send out the resulting message and request a new message.
         facePublisher.publish(face);
         boost::asio::write(socket, boost::asio::buffer("OK\n"));
