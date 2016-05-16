@@ -8,7 +8,7 @@ FacePoints facePointsInInfraredSpace
 FacePoints facePointsInColorSpace
 
 BoundingBox2D faceBoundingBoxInInfraredSpace
-BoundingBox2D FaceBoundingBoxInColorSpace
+BoundingBox2D faceBoundingBoxInColorSpace
 
 Quaternion faceRotationQuaternion
 

@@ -63,28 +63,32 @@ int main(int argC,char **argV)
                 k2_client::Body body;
                 body.header.stamp = ros::Time::now();
                 body.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/depthFrame";
-                body.leanTrackingState = jsonObject[i]["LeanTrackingState"].asInt();
-                body.lean.leanX = jsonObject[i]["Lean"]["X"].asDouble();
-                body.lean.leanY = jsonObject[i]["Lean"]["Y"].asDouble();
-                body.isTracked = jsonObject[i]["IsTracked"].asBool();
+                body.fromX = jsonObject[i]["FromX"].asInt();
+                body.fromY = jsonObject[i]["FromY"].asInt();
+                body.toX = jsonObject[i]["toX"].asInt();
+                body.toY = jsonObject[i]["toY"].asInt();
+                body.leanTrackingState = jsonObject[i]["Body"]["LeanTrackingState"].asInt();
+                body.lean.leanX = jsonObject[i]["Body"]["Lean"]["X"].asDouble();
+                body.lean.leanY = jsonObject[i]["Body"]["Lean"]["Y"].asDouble();
+                body.isTracked = jsonObject[i]["Body"]["IsTracked"].asBool();
                 if (!body.isTracked) {
                     continue;
                 }
-                body.trackingId = jsonObject[i]["TrackingId"].asUInt64();
-                body.clippedEdges = jsonObject[i]["ClippedEdges"].asInt();
-                body.engaged = jsonObject[i]["Engaged"].asBool();
-                body.handRightConfidence = jsonObject[i]["HandRightConfidence"].asInt();
-                body.handRightState = jsonObject[i]["HandRightState"].asInt();
-                body.handLeftConfidence = jsonObject[i]["HandLeftConfidence"].asInt();
-                body.handLeftState = jsonObject[i]["HandLeftState"].asInt();
-                body.appearance.wearingGlasses = jsonObject[i]["Appearance"]["WearingGlasses"].asBool();
-                body.activities.eyeLeftClosed = jsonObject[i]["Activities"]["EyeLeftClosed"].asBool();
-                body.activities.eyeRightClosed = jsonObject[i]["Activities"]["EyeRightClosed"].asBool();
-                body.activities.mouthOpen = jsonObject[i]["Activities"]["MouthOpen"].asBool();
-                body.activities.mouthMoved = jsonObject[i]["Activities"]["MouthMoved"].asBool();
-                body.activities.lookingAway = jsonObject[i]["Activities"]["LookingAway"].asBool();
-                body.expressions.neutral = jsonObject[i]["Expressions"]["Neutral"].asBool();
-                body.expressions.neutral = jsonObject[i]["Expressions"]["Happy"].asBool();
+                body.trackingId = jsonObject[i]["Body"]["TrackingId"].asUInt64();
+                body.clippedEdges = jsonObject[i]["Body"]["ClippedEdges"].asInt();
+                body.engaged = jsonObject[i]["Body"]["Engaged"].asBool();
+                body.handRightConfidence = jsonObject[i]["Body"]["HandRightConfidence"].asInt();
+                body.handRightState = jsonObject[i]["Body"]["HandRightState"].asInt();
+                body.handLeftConfidence = jsonObject[i]["Body"]["HandLeftConfidence"].asInt();
+                body.handLeftState = jsonObject[i]["Body"]["HandLeftState"].asInt();
+                body.appearance.wearingGlasses = jsonObject[i]["Body"]["Appearance"]["WearingGlasses"].asBool();
+                body.activities.eyeLeftClosed = jsonObject[i]["Body"]["Activities"]["EyeLeftClosed"].asBool();
+                body.activities.eyeRightClosed = jsonObject[i]["Body"]["Activities"]["EyeRightClosed"].asBool();
+                body.activities.mouthOpen = jsonObject[i]["Body"]["Activities"]["MouthOpen"].asBool();
+                body.activities.mouthMoved = jsonObject[i]["Body"]["Activities"]["MouthMoved"].asBool();
+                body.activities.lookingAway = jsonObject[i]["Body"]["Activities"]["LookingAway"].asBool();
+                body.expressions.neutral = jsonObject[i]["Body"]["Expressions"]["Neutral"].asBool();
+                body.expressions.neutral = jsonObject[i]["Body"]["Expressions"]["Happy"].asBool();
                 for(int j=0;j<25;j++)
                 {
                     k2_client::JointOrientationAndType JOAT;
@@ -139,7 +143,7 @@ int main(int argC,char **argV)
         }
         catch (...)
         {
-            ROS_ERROR("An exception occured");
+            ROS_ERROR("startBody - An exception occured");
             continue;
         }
         if (bodyArray.bodies.size() > 0) 
