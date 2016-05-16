@@ -9,7 +9,7 @@
         <node machine="hyperv-linux" name="startRGB" pkg="k2_client" type="startRGB"/>
         <node machine="hyperv-linux" name="startDepth" pkg="k2_client" type="startDepth" output="screen"/>
         <node machine="hyperv-linux" name="startBody" pkg="k2_client" type="startBody" output="screen"/>
-        <-node machine="hyperv-linux" name="startFace" pkg="k2_client" type="startFace" output="screen"/>
+        <node machine="hyperv-linux" name="startFace" pkg="k2_client" type="startFace" output="screen"/>
   
      </group>
 </launch>

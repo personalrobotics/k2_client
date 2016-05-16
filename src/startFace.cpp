@@ -3,8 +3,19 @@
 #include <iconv.h>
 #include <cstdio>
 
+std::string topicName = "faceArray";
+size_t streamSize = 60000;
+size_t readSkipSize = 60000;
+size_t stringSize = 30000;
+
 int main(int argC,char **argV)
 {
+    ros::init(argC,argV,"startFace");
+    ros::NodeHandle n;
+    std::string serverAddress;
+    n.getParam("/serverNameOrIP",serverAddress);
+    Socket mySocket(serverAddress.c_str(),"9006",streamSize);
+    ros::Publisher facePub = n.advertise<k2_client::FaceArray>(topicName,1);
     while(ros::ok())
     {
         mySocket.readData();

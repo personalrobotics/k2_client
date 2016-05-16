@@ -35,9 +35,9 @@ size_t streamSize = 60000;
 size_t readSkipSize = 60000;
 size_t stringSize = 30000;
 
-int main(int argC,char **argV)
+int main(int argc,char **argv)
 {
-    ros::init(argC,argV,"startBody");
+    ros::init(argc,argv,"startBody");
     ros::NodeHandle n;
     std::string serverAddress;
     n.getParam("/serverNameOrIP",serverAddress);
@@ -65,8 +65,8 @@ int main(int argC,char **argV)
                 body.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/depthFrame";
                 body.fromX = jsonObject[i]["FromX"].asInt();
                 body.fromY = jsonObject[i]["FromY"].asInt();
-                body.toX = jsonObject[i]["toX"].asInt();
-                body.toY = jsonObject[i]["toY"].asInt();
+                body.toX = jsonObject[i]["ToX"].asInt();
+                body.toY = jsonObject[i]["ToY"].asInt();
                 body.leanTrackingState = jsonObject[i]["Body"]["LeanTrackingState"].asInt();
                 body.lean.leanX = jsonObject[i]["Body"]["Lean"]["X"].asDouble();
                 body.lean.leanY = jsonObject[i]["Body"]["Lean"]["Y"].asDouble();
