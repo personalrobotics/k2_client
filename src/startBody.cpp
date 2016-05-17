@@ -123,17 +123,17 @@ int main(int argc,char **argv)
                         case 24: fieldName = "ThumbRight";break;
                     }
 
-                    JOAT.orientation.x = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["X"].asDouble();
-                    JOAT.orientation.y = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Y"].asDouble();
-                    JOAT.orientation.z = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Z"].asDouble();
-                    JOAT.orientation.w = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["W"].asDouble();
-                    JOAT.jointType = jsonObject[i]["JointOrientations"][fieldName]["JointType"].asInt();
+                    JOAT.orientation.x = jsonObject[i]["Body"]["JointOrientations"][fieldName]["Orientation"]["X"].asDouble();
+                    JOAT.orientation.y = jsonObject[i]["Body"]["JointOrientations"][fieldName]["Orientation"]["Y"].asDouble();
+                    JOAT.orientation.z = jsonObject[i]["Body"]["JointOrientations"][fieldName]["Orientation"]["Z"].asDouble();
+                    JOAT.orientation.w = jsonObject[i]["Body"]["JointOrientations"][fieldName]["Orientation"]["W"].asDouble();
+                    JOAT.jointType = jsonObject[i]["Body"]["JointOrientations"][fieldName]["JointType"].asInt();
 
-                    JPAS.trackingState = jsonObject[i]["Joints"][fieldName]["TrackingState"].asBool();
-                    JPAS.position.x = jsonObject[i]["Joints"][fieldName]["Position"]["X"].asDouble();
-                    JPAS.position.y = jsonObject[i]["Joints"][fieldName]["Position"]["Y"].asDouble();
-                    JPAS.position.z = jsonObject[i]["Joints"][fieldName]["Position"]["Z"].asDouble();
-                    JPAS.jointType = jsonObject[i]["Joints"][fieldName]["JointType"].asInt();
+                    JPAS.trackingState = jsonObject[i]["Body"]["Joints"][fieldName]["TrackingState"].asBool();
+                    JPAS.position.x = jsonObject[i]["Body"]["Joints"][fieldName]["Position"]["X"].asDouble();
+                    JPAS.position.y = jsonObject[i]["Body"]["Joints"][fieldName]["Position"]["Y"].asDouble();
+                    JPAS.position.z = jsonObject[i]["Body"]["Joints"][fieldName]["Position"]["Z"].asDouble();
+                    JPAS.jointType = jsonObject[i]["Body"]["Joints"][fieldName]["JointType"].asInt();
                     
                     body.jointOrientations.push_back(JOAT);
                     body.jointPositions.push_back(JPAS);
