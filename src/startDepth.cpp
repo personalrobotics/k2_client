@@ -29,46 +29,42 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 
 // this alternate resolution for an aligned depth image
 //int imageSize = 639392;
-int imageSize = 434176;
-int streamSize = imageSize + sizeof(double);
+int imageSize = 1920 * 1080 * 6;
+int streamSize = imageSize;
 std::string cameraName = "depth";
 std::string imageTopicSubName = "image_depth";
 std::string cameraFrame = "";
 
 int main(int argC,char **argV)
 {
-	ros::init(argC,argV,"startDepth");
-	ros::NodeHandle n(cameraName);
-	image_transport::ImageTransport imT(n);
-	std::string serverAddress;
-	n.getParam("/serverNameOrIP",serverAddress);
+    ros::init(argC,argV,"startDepth");
+    ros::NodeHandle n(cameraName);
+    image_transport::ImageTransport imT(n);
+    std::string serverAddress;
+    n.getParam("/serverNameOrIP",serverAddress);
     n.getParam(ros::this_node::getNamespace().substr(1,std::string::npos) +
             "/depth_frame", cameraFrame);
-	Socket mySocket(serverAddress.c_str(),"9001",streamSize);
-    image_transport::CameraPublisher cameraPublisher = imT.advertiseCamera(
-            imageTopicSubName, 1);
-	camera_info_manager::CameraInfoManager camInfoMgr(n,cameraName);
-	camInfoMgr.loadCameraInfo("");
-	cv::Mat frame;
-	cv_bridge::CvImage cvImage;
-	sensor_msgs::Image rosImage;
-	while(ros::ok())
-	{
-		mySocket.readData();
-        // this alternate resolution was for an aligned depth image
-		//frame = cv::Mat(cv::Size(754,424),CV_16UC1,mySocket.mBuffer);
-        frame = cv::Mat(cv::Size(512,424), CV_16UC1,mySocket.mBuffer);
-		cv::flip(frame,frame,1);
-		double utcTime;
-		memcpy(&utcTime,&mySocket.mBuffer[imageSize],sizeof(double));
+    Socket mySocket(serverAddress.c_str(), "18000", streamSize);
+    image_transport::Publisher imagePublisher = imT.advertise(imageTopicSubName, 1);
+    cv::Mat frame;
+    cv_bridge::CvImage cvImage;
+    sensor_msgs::Image rosImage;
+    while(ros::ok())
+    {
+        mySocket.readData();
+//      for(int i=0; i < 6; i++) {
+//          printf("%02x", (unsigned char)(mySocket.mBuffer[(1920 * 1079 + 1000) * 6 + i]));
+//      }
+//      printf("\n");
+        frame = cv::Mat(cv::Size(1920,1080), CV_16SC3,mySocket.mBuffer);
+		cv::flip(frame,frame,0);
+        cv::Vec3s test_vec = frame.at<cv::Vec3s>(500, 500);
         cvImage.header.frame_id = cameraFrame.c_str();
-		cvImage.encoding = "16UC1";
+		cvImage.encoding = "16SC3";
 		cvImage.image = frame;
 		cvImage.toImageMsg(rosImage);
-		sensor_msgs::CameraInfo camInfo = camInfoMgr.getCameraInfo();
-		camInfo.header.frame_id = cvImage.header.frame_id;
-        cameraPublisher.publish(rosImage, camInfo, ros::Time(utcTime));
+        imagePublisher.publish(rosImage);
 		ros::spinOnce();
-	}
-	return 0;
+    }
+    return 0;
 }

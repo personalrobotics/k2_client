@@ -1,4 +1,8 @@
 Header header
+int32 fromX
+int32 toX
+int32 fromY
+int32 toY
 int32 leanTrackingState
 Lean lean
 bool isRestricted

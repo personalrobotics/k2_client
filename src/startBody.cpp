@@ -28,34 +28,25 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include "k2_client/k2_client.h"
 #include "k2_client/BodyArray.h"
 #include <iconv.h>
+#include <cstdio>
 
 std::string topicName = "bodyArray";
-size_t streamSize = 56008;
-size_t readSkipSize = 56000;
-size_t stringSize = 28000;
+size_t streamSize = 60000;
+size_t readSkipSize = 60000;
+size_t stringSize = 30000;
 
-int main(int argC,char **argV)
+int main(int argc,char **argv)
 {
-    ros::init(argC,argV,"startBody");
+    ros::init(argc,argv,"startBody");
     ros::NodeHandle n;
     std::string serverAddress;
     n.getParam("/serverNameOrIP",serverAddress);
     Socket mySocket(serverAddress.c_str(),"9003",streamSize);
-    iconv_t charConverter = iconv_open("UTF-8","UTF-16");
     ros::Publisher bodyPub = n.advertise<k2_client::BodyArray>(topicName,1);
-    char jsonCharArray[readSkipSize];
-   
     while(ros::ok())
     {
         mySocket.readData();        
-        char *jsonCharArrayPtr;
-        char *socketCharArrayPtr;
-        jsonCharArrayPtr = jsonCharArray;
-        socketCharArrayPtr = mySocket.mBuffer;
-        iconv(charConverter,&socketCharArrayPtr,&readSkipSize,&jsonCharArrayPtr,&stringSize);
-        double utcTime;
-        memcpy(&utcTime,&mySocket.mBuffer[readSkipSize],sizeof(double));
-        std::string jsonString(jsonCharArray);
+        std::string jsonString(mySocket.mBuffer);
         Json::Value jsonObject;
         Json::Reader jsonReader;
         bool parsingSuccessful = jsonReader.parse(jsonString,jsonObject,false);
@@ -70,27 +61,34 @@ int main(int argC,char **argV)
             for(int i=0;i<6;i++)
             {
                 k2_client::Body body;
-                body.header.stamp = ros::Time(utcTime);
+                body.header.stamp = ros::Time::now();
                 body.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/depthFrame";
-                body.leanTrackingState = jsonObject[i]["LeanTrackingState"].asInt();
-                body.lean.leanX = jsonObject[i]["Lean"]["X"].asDouble();
-                body.lean.leanY = jsonObject[i]["Lean"]["Y"].asDouble();
-                body.isTracked = jsonObject[i]["IsTracked"].asBool();
-                body.trackingId = jsonObject[i]["TrackingId"].asUInt64();
-                body.clippedEdges = jsonObject[i]["ClippedEdges"].asInt();
-                body.engaged = jsonObject[i]["Engaged"].asBool();
-                body.handRightConfidence = jsonObject[i]["HandRightConfidence"].asInt();
-                body.handRightState = jsonObject[i]["HandRightState"].asInt();
-                body.handLeftConfidence = jsonObject[i]["HandLeftConfidence"].asInt();
-                body.handLeftState = jsonObject[i]["HandLeftState"].asInt();
-                body.appearance.wearingGlasses = jsonObject[i]["Appearance"]["WearingGlasses"].asBool();
-                body.activities.eyeLeftClosed = jsonObject[i]["Activities"]["EyeLeftClosed"].asBool();
-                body.activities.eyeRightClosed = jsonObject[i]["Activities"]["EyeRightClosed"].asBool();
-                body.activities.mouthOpen = jsonObject[i]["Activities"]["MouthOpen"].asBool();
-                body.activities.mouthMoved = jsonObject[i]["Activities"]["MouthMoved"].asBool();
-                body.activities.lookingAway = jsonObject[i]["Activities"]["LookingAway"].asBool();
-                body.expressions.neutral = jsonObject[i]["Expressions"]["Neutral"].asBool();
-                body.expressions.neutral = jsonObject[i]["Expressions"]["Happy"].asBool();
+                body.fromX = jsonObject[i]["FromX"].asInt();
+                body.fromY = jsonObject[i]["FromY"].asInt();
+                body.toX = jsonObject[i]["ToX"].asInt();
+                body.toY = jsonObject[i]["ToY"].asInt();
+                body.leanTrackingState = jsonObject[i]["Body"]["LeanTrackingState"].asInt();
+                body.lean.leanX = jsonObject[i]["Body"]["Lean"]["X"].asDouble();
+                body.lean.leanY = jsonObject[i]["Body"]["Lean"]["Y"].asDouble();
+                body.isTracked = jsonObject[i]["Body"]["IsTracked"].asBool();
+                if (!body.isTracked) {
+                    continue;
+                }
+                body.trackingId = jsonObject[i]["Body"]["TrackingId"].asUInt64();
+                body.clippedEdges = jsonObject[i]["Body"]["ClippedEdges"].asInt();
+                body.engaged = jsonObject[i]["Body"]["Engaged"].asBool();
+                body.handRightConfidence = jsonObject[i]["Body"]["HandRightConfidence"].asInt();
+                body.handRightState = jsonObject[i]["Body"]["HandRightState"].asInt();
+                body.handLeftConfidence = jsonObject[i]["Body"]["HandLeftConfidence"].asInt();
+                body.handLeftState = jsonObject[i]["Body"]["HandLeftState"].asInt();
+                body.appearance.wearingGlasses = jsonObject[i]["Body"]["Appearance"]["WearingGlasses"].asBool();
+                body.activities.eyeLeftClosed = jsonObject[i]["Body"]["Activities"]["EyeLeftClosed"].asBool();
+                body.activities.eyeRightClosed = jsonObject[i]["Body"]["Activities"]["EyeRightClosed"].asBool();
+                body.activities.mouthOpen = jsonObject[i]["Body"]["Activities"]["MouthOpen"].asBool();
+                body.activities.mouthMoved = jsonObject[i]["Body"]["Activities"]["MouthMoved"].asBool();
+                body.activities.lookingAway = jsonObject[i]["Body"]["Activities"]["LookingAway"].asBool();
+                body.expressions.neutral = jsonObject[i]["Body"]["Expressions"]["Neutral"].asBool();
+                body.expressions.neutral = jsonObject[i]["Body"]["Expressions"]["Happy"].asBool();
                 for(int j=0;j<25;j++)
                 {
                     k2_client::JointOrientationAndType JOAT;
@@ -125,17 +123,17 @@ int main(int argC,char **argV)
                         case 24: fieldName = "ThumbRight";break;
                     }
 
-                    JOAT.orientation.x = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["X"].asDouble();
-                    JOAT.orientation.y = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Y"].asDouble();
-                    JOAT.orientation.z = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["Z"].asDouble();
-                    JOAT.orientation.w = jsonObject[i]["JointOrientations"][fieldName]["Orientation"]["W"].asDouble();
-                    JOAT.jointType = jsonObject[i]["JointOrientations"][fieldName]["JointType"].asInt();
+                    JOAT.orientation.x = jsonObject[i]["Body"]["JointOrientations"][fieldName]["Orientation"]["X"].asDouble();
+                    JOAT.orientation.y = jsonObject[i]["Body"]["JointOrientations"][fieldName]["Orientation"]["Y"].asDouble();
+                    JOAT.orientation.z = jsonObject[i]["Body"]["JointOrientations"][fieldName]["Orientation"]["Z"].asDouble();
+                    JOAT.orientation.w = jsonObject[i]["Body"]["JointOrientations"][fieldName]["Orientation"]["W"].asDouble();
+                    JOAT.jointType = jsonObject[i]["Body"]["JointOrientations"][fieldName]["JointType"].asInt();
 
-                    JPAS.trackingState = jsonObject[i]["Joints"][fieldName]["TrackingState"].asBool();
-                    JPAS.position.x = jsonObject[i]["Joints"][fieldName]["Position"]["X"].asDouble();
-                    JPAS.position.y = jsonObject[i]["Joints"][fieldName]["Position"]["Y"].asDouble();
-                    JPAS.position.z = jsonObject[i]["Joints"][fieldName]["Position"]["Z"].asDouble();
-                    JPAS.jointType = jsonObject[i]["Joints"][fieldName]["JointType"].asInt();
+                    JPAS.trackingState = jsonObject[i]["Body"]["Joints"][fieldName]["TrackingState"].asBool();
+                    JPAS.position.x = jsonObject[i]["Body"]["Joints"][fieldName]["Position"]["X"].asDouble();
+                    JPAS.position.y = jsonObject[i]["Body"]["Joints"][fieldName]["Position"]["Y"].asDouble();
+                    JPAS.position.z = jsonObject[i]["Body"]["Joints"][fieldName]["Position"]["Z"].asDouble();
+                    JPAS.jointType = jsonObject[i]["Body"]["Joints"][fieldName]["JointType"].asInt();
                     
                     body.jointOrientations.push_back(JOAT);
                     body.jointPositions.push_back(JPAS);
@@ -145,10 +143,11 @@ int main(int argC,char **argV)
         }
         catch (...)
         {
-            ROS_ERROR("An exception occured");
+            ROS_ERROR("startBody - An exception occured");
             continue;
         }
-        bodyPub.publish(bodyArray);
+        if (bodyArray.bodies.size() > 0) 
+            bodyPub.publish(bodyArray);
     }
     return 0;
 }

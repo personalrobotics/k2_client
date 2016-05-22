@@ -1,14 +1,15 @@
 <launch>
-    <param name="serverNameOrIP" value="172.19.179.123" />
+    <include file="$(find tinker_machine)/tinker.machine"/>
+    <param name="serverNameOrIP" value="192.168.2.5" />
     <group ns="/head/kinect2">
         <param name="rgb_frame" value="/head/kinect2/rgb"/>
         <param name="depth_frame" value="/head/kinect2/depth"/>
         <param name="ir_frame" value="/head/kinect2/depth"/>
         
-        <node name="startRGB" pkg="k2_client" type="startRGB"/>
-        <node name="startDepth" pkg="k2_client" type="startDepth" />
-        <node name="startIR" pkg="k2_client" type="startIR"/>
-        <node name="startBody" pkg="k2_client" type="startBody"/>
-        <node name="startAudio" pkg="k2_client" type="startAudio"/>
-    </group>
+        <node machine="hyperv-linux" name="startRGB" pkg="k2_client" type="startRGB"/>
+        <node machine="hyperv-linux" name="startDepth" pkg="k2_client" type="startDepth" output="screen"/>
+        <node machine="hyperv-linux" name="startBody" pkg="k2_client" type="startBody" output="screen"/>
+        <node machine="hyperv-linux" name="startFace" pkg="k2_client" type="startFace" output="screen"/>
+  
+     </group>
 </launch>
