@@ -1,14 +1,31 @@
 <launch>
-    <param name="serverNameOrIP" value="172.19.179.123" />
     <group ns="/head/kinect2">
-        <param name="rgb_frame" value="/head/kinect2/rgb"/>
-        <param name="depth_frame" value="/head/kinect2/depth"/>
-        <param name="ir_frame" value="/head/kinect2/depth"/>
+        <param name="rgb_frame" value="/head/kinect2/rgb" />
+        <param name="depth_frame" value="/head/kinect2/depth" />
+        <param name="ir_frame" value="/head/kinect2/depth" />
+
+        <!--
+        <node name="k2_audio" pkg="k2_client" type="audio">
+            <param name="host" value="172.19.179.15" />
+        </node>
+        -->
+
+        <node name="k2_bodies" pkg="k2_client" type="bodies">
+            <param name="host" value="172.19.179.15" />
+        </node>
+
+        <node name="k2_depth" pkg="k2_client" type="depth">
+            <param name="host" value="172.19.179.15" />
+        </node>
         
-        <node name="startRGB" pkg="k2_client" type="startRGB"/>
-        <node name="startDepth" pkg="k2_client" type="startDepth" />
-        <node name="startIR" pkg="k2_client" type="startIR"/>
-        <node name="startBody" pkg="k2_client" type="startBody"/>
-        <node name="startAudio" pkg="k2_client" type="startAudio"/>
+        <node name="k2_ir" pkg="k2_client" type="ir">
+            <param name="host" value="172.19.179.15" />
+        </node>
+
+        <node name="k2_rgb" pkg="k2_client" type="rgb">
+            <param name="host" value="172.19.179.15" />
+        </node>
     </group>
 </launch>
+
+
