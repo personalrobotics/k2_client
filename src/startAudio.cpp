@@ -26,7 +26,10 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
 WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************************/
 #include "k2_client/k2_client.h"
-#include "k2_client/Audio.h"
+#include <std_msgs/Float64.h>
+#include <string>
+#include <ros/ros.h>
+
 
 std::string topicName = "audio";
 int twiceStreamSize = 8200;
@@ -38,33 +41,15 @@ int main(int argC,char **argV)
 	ros::NodeHandle n;
 	std::string serverAddress;
 	n.getParam("/serverNameOrIP",serverAddress);
-	Socket mySocket(serverAddress.c_str(),"9004",twiceStreamSize);
-	ros::Publisher audioPub = n.advertise<k2_client::Audio>(topicName,1);
+	Socket mySocket(serverAddress.c_str(),"9009",twiceStreamSize);
+	ros::Publisher audioPub = n.advertise<std_msgs::Float64>(topicName,1);
 	while(ros::ok())
 	{
 		mySocket.readData();
-		std::string jsonString;
-		for(int i=0;i<twiceStreamSize;i+=2)
-		{
-			jsonString += mySocket.mBuffer[i];
-		}
-		Json::Value jsonObject;
-		Json::Reader jsonReader;
-		bool parsingSuccessful = jsonReader.parse(jsonString,jsonObject,false);
-		k2_client::Audio audio;
-		audio.header.stamp = ros::Time(jsonObject["utcTime"].asDouble());
-		audio.header.frame_id =  ros::this_node::getNamespace().substr(1,std::string::npos) + "/microphone_frame";
-		audio.beamAngle = jsonObject["beamAngle"].asDouble();
-		audio.beamAngleConfidence = jsonObject["beamAngleConfidence"].asDouble();
-		for(int i=0;i<256;i++)
-		{
-			audio.audioStream.push_back(jsonObject["audioStream"][i].asFloat());
-		}
-		audio.numBytesPerSample = jsonObject["numBytesPerSample"].asUInt();
-		audio.numSamplesPerFrame = jsonObject["numSamplesPerFrame"].asUInt();
-		audio.frameLifeTime = jsonObject["frameLifeTime"].asDouble();
-		audio.samplingFrequency = jsonObject["samplingFrequency"].asUInt();
-		audioPub.publish(audio);
+        double angle = *((double *)mySocket.mBuffer);
+        std_msgs::Float64 angle_data;
+        angle_data.data = angle;
+		audioPub.publish(angle_data);
 	}
 	return 0;
 }
