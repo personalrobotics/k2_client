@@ -1,0 +1,16 @@
+Header header
+uint64 trackingId
+float32 position_x
+float32 position_y
+float32 position_z
+bool is_talking
+float32 pitch
+float32 yaw
+float32 roll
+string leaning
+bool hand_touch
+bool face_touch
+bool arms_crossed
+float32 volume
+int16 seat
+int16 looking_at_seat

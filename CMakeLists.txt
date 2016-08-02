@@ -17,6 +17,7 @@ add_definitions(${YAMLCPP_DEFINITIONS})
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    rospy
     std_msgs
     geometry_msgs
     cv_bridge
@@ -33,6 +34,10 @@ add_message_files(FILES
     Lean.msg
     Body.msg
     Face.msg
+    PersonMessage.msg
+    PersonArray.msg
+    GameEvent.msg
+    RobotBehavior.msg
 )
 
 generate_messages(DEPENDENCIES
@@ -48,7 +53,6 @@ catkin_package(
     DEPENDS
         yaml-cpp
 )
-
 # Set the default path for built executables to the "bin" directory.
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/bin")
 

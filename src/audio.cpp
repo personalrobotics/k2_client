@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     std::string server_host, server_port, frame_id;
     n.getParam("host", server_host);
     n.param<std::string>("port", server_port, "9004"); // default for k2_server audio
-    n.param<std::string>("frame_id", frame_id, "/k2/depth_frame");
+    n.param<std::string>("frame_id", frame_id, "/k2/audio");
 
     // Create a Boost ASIO service to handle server connection.
     boost::asio::io_service io_service;
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 
         // Convert the JSON message to a ROS message.
         k2_client::Audio audio;
-        audio.header.stamp = ros::Time(node["utcTime"].as<unsigned long>());
+        audio.header.stamp = ros::Time(node["Time"].as<double>());
         audio.header.frame_id = frame_id;
         audio.beamAngle = node["beamAngle"].as<double>();
         audio.beamAngleConfidence = node["beamAngleConfidence"].as<double>();
@@ -101,6 +101,11 @@ int main(int argc, char *argv[])
         audio.numSamplesPerFrame = node["numSamplesPerFrame"].as<unsigned>();
         audio.frameLifeTime = node["frameLifeTime"].as<double>();
         audio.samplingFrequency = node["samplingFrequency"].as<unsigned>();
+        for(int j = 0; j < node["Correlations"].size(); j++)
+            audio.correlations.push_back(node["Correlations"][j]["BodyTrackingId"].as<unsigned long>());
+        audio.volume = node["Volume"].as<float>();
+        audio.relativeTime = node["RelativeTime"].as<float>();
+        audio.time = node["Time"].as<float>();
 
         // Send out the resulting message and request a new message.
         audioPublisher.publish(audio);

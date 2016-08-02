@@ -32,6 +32,10 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include <array>
 #include <yaml-cpp/yaml.h>
 
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 using boost::asio::ip::tcp;
 
 const std::array<std::string, 25> joint_names = {
@@ -79,14 +83,14 @@ int main(int argc, char *argv[])
                   server_host.c_str(), server_port.c_str(), e.what());
         return -1;
     }
-
+    
     // Create a ROS publisher for the deserialized stream output.
     ros::Publisher bodyPublisher = n.advertise<k2_client::BodyArray>("bodies", 1);
 
     while(ros::ok())
     {
         // Read the next line from the server.
-        boost::asio::read_until(socket, buffer, "\n");
+        boost::asio::read_until(socket, buffer, "\n");  //Make sure that the message being sent has '\n' at the end 
         std::istream is(&buffer);
         std::string message;
         std::getline(is, message);
@@ -102,44 +106,45 @@ int main(int argc, char *argv[])
         // Convert the JSON message to a ROS message.
         const YAML::Node bodies_node = node["Bodies"];
         k2_client::BodyArray body_array;
-
-        for (const YAML::Node &body_node : bodies_node)
-        {
-            k2_client::Body body;
-
-            body.header.stamp =              ros::Time(node["Time"].as<unsigned long>());
-            body.header.frame_id =           frame_id;
-            body.leanTrackingState =         body_node["LeanTrackingState"].as<int>();
-            body.lean.leanX =                body_node["Lean"]["X"].as<double>();
-            body.lean.leanY =                body_node["Lean"]["Y"].as<double>();
-            body.trackingId =                body_node["TrackingId"].as<unsigned long>();
-            body.clippedEdges =              body_node["ClippedEdges"].as<int>();
-            body.handRightConfidence =       body_node["HandRightConfidence"].as<int>();
-            body.handRightState =            body_node["HandRightState"].as<int>();
-            body.handLeftConfidence =        body_node["HandLeftConfidence"].as<int>();
-            body.handLeftState =             body_node["HandLeftState"].as<int>();
-
-            for (const std::string joint_name : joint_names)
+               
+            for (const YAML::Node body_node : bodies_node)
             {
-                k2_client::JointPositionAndState JPAS;
-                JPAS.trackingState = body_node["Joints"][joint_name]["TrackingState"].as<int>();
-                JPAS.position.x =    body_node["Joints"][joint_name]["Position"]["X"].as<double>();
-                JPAS.position.y =    body_node["Joints"][joint_name]["Position"]["Y"].as<double>();
-                JPAS.position.z =    body_node["Joints"][joint_name]["Position"]["Z"].as<double>();
-                JPAS.jointType =     body_node["Joints"][joint_name]["JointType"].as<int>();
-                body.jointPositions.push_back(JPAS);
+                k2_client::Body body;
 
-                k2_client::JointOrientationAndType JOAT;
-                JOAT.orientation.x = body_node["JointOrientations"][joint_name]["Orientation"]["X"].as<double>();
-                JOAT.orientation.y = body_node["JointOrientations"][joint_name]["Orientation"]["Y"].as<double>();
-                JOAT.orientation.z = body_node["JointOrientations"][joint_name]["Orientation"]["Z"].as<double>();
-                JOAT.orientation.w = body_node["JointOrientations"][joint_name]["Orientation"]["W"].as<double>();
-                JOAT.jointType =     body_node["JointOrientations"][joint_name]["JointType"].as<int>();
-                body.jointOrientations.push_back(JOAT);                
+                body.header.stamp =              ros::Time(node["Time"].as<double>());  //needs to be a double, not an unsigned long     
+                body.header.frame_id =           frame_id;
+                body.leanTrackingState =         body_node["LeanTrackingState"].as<int>();
+                body.lean.leanX =                body_node["Lean"]["X"].as<double>();
+                body.lean.leanY =                body_node["Lean"]["Y"].as<double>();
+                body.trackingId =                body_node["TrackingId"].as<unsigned long>();
+                body.clippedEdges =              body_node["ClippedEdges"].as<int>();
+                body.handRightConfidence =       body_node["HandRightConfidence"].as<int>();
+                body.handRightState =            body_node["HandRightState"].as<int>();
+                body.handLeftConfidence =        body_node["HandLeftConfidence"].as<int>();
+                body.handLeftState =             body_node["HandLeftState"].as<int>();
+
+                for (const std::string joint_name : joint_names)
+                {
+                    k2_client::JointPositionAndState JPAS;
+                    JPAS.trackingState = body_node["Joints"][joint_name]["TrackingState"].as<int>();
+                    JPAS.position.x =    body_node["Joints"][joint_name]["Position"]["X"].as<double>();
+                    JPAS.position.y =    body_node["Joints"][joint_name]["Position"]["Y"].as<double>();
+                    JPAS.position.z =    body_node["Joints"][joint_name]["Position"]["Z"].as<double>();
+                    JPAS.jointType =     body_node["Joints"][joint_name]["JointType"].as<int>();
+                    body.jointPositions.push_back(JPAS);
+
+                    k2_client::JointOrientationAndType JOAT;
+                    JOAT.orientation.x = body_node["JointOrientations"][joint_name]["Orientation"]["X"].as<double>();
+                    JOAT.orientation.y = body_node["JointOrientations"][joint_name]["Orientation"]["Y"].as<double>();
+                    JOAT.orientation.z = body_node["JointOrientations"][joint_name]["Orientation"]["Z"].as<double>();
+                    JOAT.orientation.w = body_node["JointOrientations"][joint_name]["Orientation"]["W"].as<double>();
+                    JOAT.jointType =     body_node["JointOrientations"][joint_name]["JointType"].as<int>();
+                    body.jointOrientations.push_back(JOAT);               
+                }
+
+                body_array.bodies.push_back(body);
+
             }
-
-            body_array.bodies.push_back(body);
-        }
 
         // Send out the resulting message and request a new message.
         bodyPublisher.publish(body_array);
