@@ -36,8 +36,6 @@ add_message_files(FILES
     Face.msg
     PersonMessage.msg
     PersonArray.msg
-    GameEvent.msg
-    RobotBehavior.msg
 )
 
 generate_messages(DEPENDENCIES
