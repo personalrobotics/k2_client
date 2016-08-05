@@ -37,6 +37,7 @@ def talker():
 	pub.publish(game_event)
 
 if __name__ == '__main__':
+	print "hi"
 	while True:
 		type_input = raw_input("Please input type: ")
 		if type_input == 'x':

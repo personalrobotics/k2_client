@@ -27,6 +27,7 @@ total_correct = 0.0
 total_sent = 0.0
 seat_needed = ""
 
+#All methods run for 5 seconds
 def callback_audio(data):
 	if time.time() - timeStart > 5:
 		exit_all()
@@ -45,6 +46,7 @@ def callback_face(data):
 		if key in person_dict:
 			person_dict[key].update_face_data(data.faceOrientation.x, data.faceOrientation.y, data.faceOrientation.z)
 
+#Testing body information only
 def callback_body(data):
 	global total_correct
 	global total_sent
@@ -93,7 +95,7 @@ def callback_body(data):
 
 			if len(untracked_bodies) > 0:
 				print "ERROR: Unidentified Body"
-
+				
 		else:
 			if count_messages_to_ten == 10 and not len(person_dict) == people:
 				print "ERROR: Three Bodies Not Identified"
@@ -139,6 +141,7 @@ def callback_body(data):
 				if not key1 == key2:
 					person_dict[key1].looking_at(person_dict[key2])	
 
+		#Run Tests
 		for key in person_dict:
 			if "%s"%person_dict[key].seat == seat_needed:
 				if testing == "lean":
@@ -206,7 +209,7 @@ if __name__ == '__main__':
 	info = raw_input("Additional file info? ")
 	name = raw_input("Name(s)? ")
 
-	path = "/root/src/k2_client/scripts/testing_data/test_%s_%s_%s.txt"%(testing, info, name)
+	path = "/root/workspace/src/k2_client/scripts/testing_data/test_%s_%s_%s.txt"%(testing, info, name)
 
 	file_name = open(path, "w")
 	file_name.write("%s\n"%testing)

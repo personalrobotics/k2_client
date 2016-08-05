@@ -38,32 +38,37 @@ class Person:
 			self.total_talking_time += 16
 		self.volume = volume
 
+	#Calculate Leaning
 	def is_lean(self, spine):
-		if spine < -.02:
+		if spine < -.04:
 			self.leaning = "Forward"
-		elif spine >= .02:
+		elif spine >= .04:
 			self.leaning = "Backward"
 		else:
 			self.leaning = "None"
 
+	#Calculate arms crossed
 	def is_arms_crossed(self, hand_right_x, hand_right_y, hand_right_z, hand_left_x, hand_left_y, hand_left_z, elbow_right_x, elbow_right_y, elbow_right_z, elbow_left_x, elbow_left_y, elbow_left_z):
 		if math.fabs(hand_right_x - elbow_left_x) < .3 and math.fabs(hand_left_x - elbow_right_x) < .3 and math.fabs(hand_right_y - elbow_left_y) < .3 and math.fabs(hand_left_y - elbow_right_y) < .3 and math.fabs(hand_right_z - elbow_left_z) < .3 and hand_left_z - elbow_right_z < .3:
 			self.arms_crossed = True
 		else:
 			self.arms_crossed = False
 
+	#Calculate hand touch
 	def is_hand_touch(self, hand_right_x, hand_right_y, hand_right_z, hand_left_x, hand_left_y, hand_left_z):
 		if math.fabs(hand_right_x - hand_left_x) < .15 and math.fabs(hand_right_y - hand_left_y) < .15 and math.fabs(hand_right_z - hand_left_z) < .15:
 			self.hand_touch = True
 		else:
 			self.hand_touch = False
 
+	#Calcuate face touch
 	def is_face_touch(self, face_x, face_y, face_z, hand_right_x, hand_right_y, hand_right_z, hand_left_x, hand_left_y, hand_left_z):
-		if (math.fabs(face_x - hand_right_x) < .3 or math.fabs(face_x - hand_left_x) < .3) and (math.fabs(face_y - hand_right_y) < .3 or math.fabs(face_y - hand_left_y) < .3) and (math.fabs(face_z - hand_right_z) < .3 or math.fabs(face_z - hand_left_z) < .3):
+		if (math.fabs(face_x - hand_right_x) < .2 or math.fabs(face_x - hand_left_x) < .2) and (math.fabs(face_y - hand_right_y) < .2 or math.fabs(face_y - hand_left_y) < .2) and (math.fabs(face_z - hand_right_z) < .2 or math.fabs(face_z - hand_left_z) < .2):
 			self.face_touch = True
 		else:
 			self.face_touch = False
 
+	#Calculate looking at
 	def looking_at(self, person):
 
 		pitch_orientation_correct = False
@@ -72,7 +77,7 @@ class Person:
 		xz_dist = math.sqrt(math.pow((person.x - self.x), 2) + math.pow((person.z - self.z), 2))
 		y_dist = person.y - self.y
 		ideal_pitch = math.atan(y_dist/xz_dist)
-		if (math.fabs(ideal_pitch - (self.pitch*math.pi+.2))) < 0.4:
+		if (math.fabs(ideal_pitch - (self.pitch*math.pi+.3))) < 0.5:
 			pitch_orientation_correct = True
 		else:
 			pitch_orientation_correct = False
@@ -89,17 +94,14 @@ class Person:
 		else:
 			ideal_y = theta_1 + theta_2
 
-		if (math.fabs(ideal_y - (self.yaw * math.pi)))  < 0.6:
+		if (math.fabs(ideal_y - (self.yaw * math.pi)))  < 0.5:
 			yaw_orientation_correct = True
 		else:
 			yaw_orientation_correct = False
 
-		print "%s looking at %s:" % (self.seat, person.seat)
-		#print "x_i: %s y_i: %s x: %s y: %s" % (ideal_pitch, ideal_y, self.pitch*math.pi, self.yaw*math.pi)
-		print "x_i: %s y_i: %s x: %s y: %s" % (ideal_pitch*180/math.pi, ideal_y*180/math.pi, self.pitch*180, self.yaw*180)
-		print "x pos %s y pos %s z pos %s" % (self.x, self.y, self.z)
-		print "x pos person %s y pos person %s z pos person %s" % (person.x, person.y, person.z)
-		print "x_diff: %s y_diff: %s" % (math.fabs(ideal_pitch - self.pitch*math.pi), math.fabs(ideal_y - (self.yaw * math.pi)))
+		print "%s looking at %s" % (self.seat, person.seat)
+		print "Self ideal x: %s Self ideal y: %s Self actual x: %s Self actual y: %s" %(ideal_pitch, ideal_y, self.pitch*math.pi+.2, self.yaw*math.pi)
+		print "person ideal x: %s person ideal y: %s person actual x: %s person actual y: %s" %(ideal_pitch, ideal_y, person.pitch*math.pi+.2, person.yaw*math.pi)
 
 		if (pitch_orientation_correct and yaw_orientation_correct):
 			self.looking_at_seat = person.seat
@@ -116,7 +118,5 @@ class Person:
 		print "seat %s" % (self.seat)
 		print "looking at: %s" % (self.looking_at_seat)
 		print "\n"
-		#return "\n x: %s y: %s z: %s \n talking: %s total time talking: %s volume: %s \n pitch: %s yaw: %s roll: %s \n leaning: %s arms crossed: %s hand touch: %s face touch: %s \n seat %s \n looking at: %s \n" % (self.x, self.y, self.z, self.is_talking, self.total_talking_time, self.volume, self.pitch, self.yaw*math.pi, self.roll*math.pi, self.leaning, self.arms_crossed, self.hand_touch, self.face_touch, self.seat, self.looking_at_seat)
-
 
 

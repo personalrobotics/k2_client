@@ -7,3 +7,6 @@ class Seat:
 
 	def __str__(self):
 		return self.label
+'''
+Records information about a person's seat
+'''

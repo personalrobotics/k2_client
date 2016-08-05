@@ -16,7 +16,6 @@ from k2_client.msg import PersonArray
 
 person_dict = dict([])
 seat_list = []
-#seat_names = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 seat_names = ['A','B','C','D','E','F']
 count_messages_to_ten = 0
 distance = .3
@@ -133,7 +132,7 @@ def callback_body(data):
 	for key in person_dict:
 		person_dict[key].print_person_info()
 
-
+#Calculate information about leaning, armscrossed, facetouch, and hand touch and store that information
 def update_all_body_info(body, key):
 	p = body.jointPositions
 	person_dict[key].update_body_data(p[3].position.x, p[3].position.y, p[3].position.z)
@@ -144,6 +143,7 @@ def update_all_body_info(body, key):
 	person_dict[key].is_face_touch(p[3].position.x, p[3].position.y, p[3].position.z, p[23].position.x, p[23].position.y, p[23].position.z, 
 		p[21].position.x, p[21].position.y, p[21].position.z)
 
+#Publish calculated information on a new topic
 def publish(time):
 	person_a = PersonArray()
 	person_array = person_a.people
@@ -189,5 +189,6 @@ if __name__ == '__main__':
 		seat_list.append(Seat(0.0,0.0,0.0,c))
 	count_messages_to_ten = 0
 	listener()
-	print person_dict.keys()
+	#For debugging purposes 
+	#print person_dict.keys()
 
