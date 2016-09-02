@@ -1,0 +1,1 @@
+> **:warning: This codebase has been merged with its sister package `k2_server` to keep both packages in sync.  The latest code can now be found in the joint repostory [k2_bridge](https://github.com/personalrobotics/k2_bridge).**
