@@ -6,3 +6,7 @@ int16 numBytesPerSample
 int16 numSamplesPerFrame
 float64 frameLifeTime
 int16 samplingFrequency
+int64[] correlations
+float32 volume
+float32 relativeTime
+float32 time

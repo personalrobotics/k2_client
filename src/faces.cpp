@@ -32,6 +32,10 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #include <array>
 #include <yaml-cpp/yaml.h>
 
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 using boost::asio::ip::tcp;
 
 
@@ -45,7 +49,7 @@ int main(int argc, char *argv[])
     std::string server_host, server_port, frame_id;
     n.getParam("host", server_host);
     n.param<std::string>("port", server_port, "9005"); // default for k2_server faces
-    n.param<std::string>("frame_id", frame_id, "/k2/depth_frame");
+    n.param<std::string>("frame_id", frame_id, "/k2/faces");
 
     // Create a Boost ASIO service to handle server connection.
     boost::asio::io_service io_service;
@@ -89,44 +93,51 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        const YAML::Node alignment = node["Alignment"];
-        const YAML::Node animation_units = alignment["AnimationUnits"];
-
         // Convert the JSON message to a ROS message.
         k2_client::Face face;
 
-        face.header.stamp =            ros::Time(node["Time"].as<unsigned long>());
+        face.header.stamp =            ros::Time(node["Time"].as<double>());
         face.header.frame_id =         frame_id;
         face.trackingId =              node["TrackingId"].as<unsigned long>();
 
-        face.jawOpen =                 animation_units["JawOpen"].as<double>();
-        face.lipPucker =               animation_units["LipPucker"].as<double>();
-        face.jawSlideRight =           animation_units["JawSlideRight"].as<double>();
-        face.lipStretcherRight =       animation_units["LipStretcherRight"].as<double>();
-        face.lipStretcherLeft =        animation_units["LipStretcherLeft"].as<double>();
-        face.lipCornerPullerLeft =     animation_units["LipCornerPullerLeft"].as<double>();
-        face.lipCornerPullerRight =    animation_units["LipCornerPullerRight"].as<double>();
-        face.lipCornerDepressorLeft =  animation_units["LipCornerDepressorLeft"].as<double>();
-        face.lipCornerDepressorRight = animation_units["LipCornerDepressorRight"].as<double>();
-        face.leftCheekPuff =           animation_units["LeftcheekPuff"].as<double>();
-        face.rightCheekPuff =          animation_units["RightcheekPuff"].as<double>();
-        face.leftEyeClosed =           animation_units["LefteyeClosed"].as<double>();
-        face.rightEyeClosed =          animation_units["RighteyeClosed"].as<double>();
-        face.leftEyebrowLowerer =      animation_units["LefteyebrowLowerer"].as<double>();
-        face.rightEyebrowLowerer =     animation_units["RighteyebrowLowerer"].as<double>();
-        face.lowerLipDepressorLeft =   animation_units["LowerlipDepressorLeft"].as<double>();
-        face.lowerLipDepressorRight =  animation_units["LowerlipDepressorRight"].as<double>();
-        face.lowerLipDepressorLeft =   animation_units["LowerlipDepressorLeft"].as<double>();
-        face.lowerLipDepressorLeft =   animation_units["LowerlipDepressorLeft"].as<double>();
-        
-        face.headPivotPoint.x =        alignment["HeadPivotPoint"]["X"].as<double>();
-        face.headPivotPoint.y =        alignment["HeadPivotPoint"]["Y"].as<double>();
-        face.headPivotPoint.z =        alignment["HeadPivotPoint"]["Z"].as<double>();
+        face.faceOrientation.x =       node["Orientation"]["X"].as<double>();
+        face.faceOrientation.y =       node["Orientation"]["Y"].as<double>();
+        face.faceOrientation.z =       node["Orientation"]["Z"].as<double>();
+        face.faceOrientation.w =       node["Orientation"]["W"].as<double>();
 
-        face.faceOrientation.x =       alignment["FaceOrientation"]["X"].as<double>();
-        face.faceOrientation.y =       alignment["FaceOrientation"]["Y"].as<double>();
-        face.faceOrientation.z =       alignment["FaceOrientation"]["Z"].as<double>();
-        face.faceOrientation.w =       alignment["FaceOrientation"]["W"].as<double>();
+        face.eyeRight.x = node["Points"]["EyeRight"]["X"].as<double>();
+        face.eyeRight.y = node["Points"]["EyeRight"]["Y"].as<double>();
+        face.eyeRight.z = 0.0;
+
+        face.eyeLeft.x = node["Points"]["EyeLeft"]["X"].as<double>();
+        face.eyeLeft.y = node["Points"]["EyeLeft"]["Y"].as<double>();
+        face.eyeLeft.z = 0.0;
+
+        face.nose.x = node["Points"]["Nose"]["X"].as<double>();
+        face.nose.y = node["Points"]["Nose"]["Y"].as<double>();
+        face.nose.z = 0.0;
+
+        face.mouthRight.x = node["Points"]["MouthCornerRight"]["X"].as<double>();
+        face.mouthRight.y = node["Points"]["MouthCornerRight"]["Y"].as<double>();
+        face.mouthRight.z = 0.0;
+
+        face.mouthLeft.x = node["Points"]["MouthCornerLeft"]["X"].as<double>();
+        face.mouthLeft.y = node["Points"]["MouthCornerLeft"]["Y"].as<double>();
+        face.mouthLeft.z = 0.0;
+
+        face.happy = node["Properties"]["Happy"].as<long>();
+        face.engaged = node["Properties"]["Engaged"].as<long>();
+        
+        face.glasses = node["Properties"]["WearingGlasses"].as<long>();
+        
+        face.rightClosed = node["Properties"]["RightEyeClosed"].as<long>();
+        face.leftClosed = node["Properties"]["LeftEyeClosed"].as<long>();
+        face.mouthOpen = node["Properties"]["MouthOpen"].as<long>();
+        face.mouthMoved = node["Properties"]["MouthMoved"].as<long>();
+        face.lookingAway = node["Properties"]["LookingAway"].as<long>();
+        
+
+        //ROS_FATAL("Data Received");
 
         // Send out the resulting message and request a new message.
         facePublisher.publish(face);

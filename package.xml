@@ -21,7 +21,9 @@
   <depend>cv_bridge</depend>
   <depend>image_transport</depend>
   <depend>camera_info_manager</depend> 
-  <depend>yaml-cpp</depend> 
+  <depend>yaml-cpp</depend>
+
+  <export>k2_client</export>
   
 </package>
 
